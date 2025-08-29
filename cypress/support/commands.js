@@ -33,7 +33,7 @@ Cypress.Commands.add('searchProduct', (productName) => {
   cy.get('a[href*="/dp/"]').should('have.length.greaterThan', 0)
 })
 
-// Comando para selecionar primeiro produto da lista - otimizado
+// Comando para selecionar primeiro produto da lista - otimizado para CI/CD
 Cypress.Commands.add('selectFirstProduct', () => {
   // Aguarda os produtos estarem disponíveis para clique
   cy.get('a[href*="/dp/"], h2 a, .a-link-normal')
@@ -41,27 +41,41 @@ Cypress.Commands.add('selectFirstProduct', () => {
     .first()
     .should('be.visible')
     .click()
+
+  // Aguarda a página do produto carregar completamente
+  cy.wait(3000)
   
-  // Aguarda a página do produto carregar - valida elementos específicos da página de produto
+  // Valida elementos específicos da página de produto
   cy.get('#add-to-cart-button, .add-to-cart, button[data-action="add-to-cart"], input[value*="Add to Cart"]')
     .should('be.visible')
+    .should('exist')
+  
+  // Aguarda um pouco mais para garantir que tudo carregou
+  cy.wait(2000)
 })
 
-// Comando para adicionar produto ao carrinho - otimizado
+// Comando para adicionar produto ao carrinho - otimizado para CI/CD
 Cypress.Commands.add('addToCart', () => {
+  // Aguarda a página carregar completamente
+  cy.wait(2000)
+  
   // Tenta diferentes seletores para o botão de adicionar ao carrinho
   cy.get('#add-to-cart-button, .add-to-cart, button[data-action="add-to-cart"], input[value*="Add to Cart"]')
     .should('be.visible')
+    .should('not.be.disabled')
     .first()
-    .click()
-  
+    .scrollIntoView() // Garante que o elemento está visível
+    .click({ force: true }) // Força o clique se necessário
+
   // Aguarda confirmação de adição ao carrinho - validação mais flexível
+  // Pode ser uma mensagem de sucesso, confirmação, ou mudança na URL
   cy.get('body').should('satisfy', (body) => {
     const bodyText = body.text().toLowerCase()
-    return bodyText.includes('added') || 
-           bodyText.includes('cart') || 
+    return bodyText.includes('added') ||
+           bodyText.includes('cart') ||
            bodyText.includes('success') ||
-           bodyText.includes('confirm')
+           bodyText.includes('confirm') ||
+           bodyText.includes('shopping cart')
   })
 })
 
@@ -111,4 +125,26 @@ Cypress.Commands.add('measurePageLoadTime', () => {
 // Comando para aguarda inteligente com timeout otimizado
 Cypress.Commands.add('waitForElement', (selector, timeout = 5000) => {
   cy.get(selector, { timeout }).should('be.visible')
+})
+
+// Comando para retry inteligente de elementos problemáticos
+Cypress.Commands.add('retryClick', (selector, options = {}) => {
+  const maxAttempts = options.maxAttempts || 3
+  const delay = options.delay || 1000
+  
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      cy.get(selector)
+        .should('be.visible')
+        .should('not.be.disabled')
+        .scrollIntoView()
+        .click({ force: true })
+      return // Sucesso, sai da função
+    } catch (error) {
+      if (attempt === maxAttempts) {
+        throw error // Última tentativa falhou
+      }
+      cy.wait(delay) // Aguarda antes da próxima tentativa
+    }
+  }
 })

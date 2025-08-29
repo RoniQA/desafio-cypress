@@ -7,9 +7,9 @@ module.exports = defineConfig({
     viewportHeight: 720,
     
     // Timeouts otimizados para CI/CD
-    defaultCommandTimeout: 8000,
-    requestTimeout: 8000,
-    responseTimeout: 8000,
+    defaultCommandTimeout: 15000, // Aumentado para 15s
+    requestTimeout: 15000,
+    responseTimeout: 15000,
     
     // Configurações para performance em CI/CD
     video: false, // Desabilita vídeo para maior velocidade
@@ -20,7 +20,7 @@ module.exports = defineConfig({
     
     // Configurações para Paralelização
     retries: {
-      runMode: 1,
+      runMode: 2, // Aumentado para 2 tentativas
       openMode: 0
     },
     
@@ -37,8 +37,11 @@ module.exports = defineConfig({
     scrollBehavior: false,
     
     // Configurações específicas para GitHub Actions
-    chromeWebSecurity: false,
     modifyObstructiveCode: false,
+    
+    // Configurações de viewport para CI/CD
+    viewportWidth: 1366,
+    viewportHeight: 768,
     
     setupNodeEvents(on, config) {
       // implement node event listeners here

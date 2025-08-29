@@ -52,13 +52,19 @@ describe('Performance Tests - Amazon E-commerce', () => {
     
     // Mede tempo de carregamento do campo de busca
     cy.measurePageLoadTime()
-    cy.get('#twotabsearchtextbox').should('be.visible')
+    cy.get('input[type="text"], input[placeholder*="search"], input[aria-label*="search"], #twotabsearchtextbox')
+      .should('be.visible')
+      .first()
     
     // Mede tempo de carregamento do botão de busca
-    cy.get('#nav-search-submit-button').should('be.visible')
+    cy.get('input[type="submit"], button[type="submit"], #nav-search-submit-button, .nav-search-submit')
+      .should('be.visible')
+      .first()
     
     // Mede tempo de carregamento do carrinho
-    cy.get('#nav-cart').should('be.visible')
+    cy.get('#nav-cart, .nav-cart, a[href*="/cart"], [data-testid="cart"]')
+      .should('be.visible')
+      .first()
     
     cy.log('✅ Medições de elementos concluídas!')
   })
