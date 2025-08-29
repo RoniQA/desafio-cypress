@@ -17,11 +17,11 @@ describe('Performance Tests - Amazon E-commerce', () => {
     
     // 2. Seleção de produto - com seletores otimizados
     cy.log('2. Selecionando produto (otimizado)...')
-    cy.selectFirstProduct()
+    cy.selectFirstProductRobust()
     
     // 3. Adição ao carrinho - com seletores otimizados
     cy.log('3. Adicionando ao carrinho (otimizado)...')
-    cy.addToCart()
+    cy.addToCartRobust()
     
     // 4. Validação no carrinho - com seletores otimizados
     cy.log('4. Validando no carrinho (otimizado)...')

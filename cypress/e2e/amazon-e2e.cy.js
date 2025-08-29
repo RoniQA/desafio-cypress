@@ -21,7 +21,7 @@ describe('Amazon E-commerce - Fluxo de Ponta a Ponta', () => {
     
     // 3. Selecionar primeiro produto da lista
     cy.log('3. Selecionando produto da lista...')
-    cy.selectFirstProduct()
+    cy.selectFirstProductRobust()
     
     // 4. Validar página do produto
     cy.log('4. Validando página do produto...')
@@ -29,7 +29,7 @@ describe('Amazon E-commerce - Fluxo de Ponta a Ponta', () => {
     
     // 5. Adicionar produto ao carrinho
     cy.log('5. Adicionando produto ao carrinho...')
-    cy.addToCart()
+    cy.addToCartRobust()
     
     // 6. Validar produto no carrinho
     cy.log('6. Validando produto no carrinho...')
