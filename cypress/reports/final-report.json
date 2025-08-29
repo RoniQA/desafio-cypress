@@ -1,0 +1,15 @@
+{
+  "timestamp": "2025-08-29T18:35:51.370Z",
+  "metrics": [],
+  "evidence": [],
+  "summary": {
+    "totalMetrics": 0,
+    "totalEvidence": 0,
+    "testDuration": 0
+  },
+  "performance": {
+    "totalDuration": 74168,
+    "browser": "electron",
+    "version": "118.0.5993.159"
+  }
+}

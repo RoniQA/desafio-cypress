@@ -165,7 +165,65 @@ Cypress.Commands.add('measurePageLoadTime', () => {
     const endTime = performance.now()
     const loadTime = endTime - startTime
     cy.log(`⏱️ Tempo de carregamento da página: ${loadTime.toFixed(2)}ms`)
+    
+    // Adiciona métrica ao relatório
+    if (Cypress.env('collectMetrics')) {
+      cy.task('addMetric', {
+        name: 'pageLoadTime',
+        value: loadTime,
+        unit: 'ms',
+        timestamp: new Date().toISOString()
+      })
+    }
   })
+})
+
+// Comando para coletar métricas detalhadas de performance
+Cypress.Commands.add('collectPerformanceMetrics', (testName) => {
+  const metrics = {
+    testName,
+    timestamp: new Date().toISOString(),
+    viewport: {
+      width: Cypress.config('viewportWidth'),
+      height: Cypress.config('viewportHeight')
+    },
+    browser: Cypress.browser.name,
+    version: Cypress.browser.version
+  }
+  
+  // Salva métricas básicas para o relatório
+  cy.task('saveMetrics', metrics)
+  
+  cy.log(`📊 Métricas de performance coletadas para: ${testName}`)
+})
+
+// Comando para capturar evidências visuais
+Cypress.Commands.add('captureEvidence', (stepName) => {
+  const timestamp = new Date().toISOString()
+  const evidenceName = `${stepName}_${timestamp.replace(/[:.]/g, '-')}`
+  
+  // Captura screenshot
+  cy.screenshot(evidenceName)
+  
+  // Captura informações da página
+  cy.get('body').then(($body) => {
+    const pageInfo = {
+      step: stepName,
+      timestamp,
+      url: cy.url(),
+      title: $body.find('title').text() || 'Sem título',
+      elements: {
+        links: $body.find('a').length,
+        images: $body.find('img').length,
+        forms: $body.find('form').length
+      }
+    }
+    
+    // Salva evidência para o relatório
+    cy.task('saveEvidence', pageInfo)
+  })
+  
+  cy.log(`📸 Evidência capturada: ${stepName}`)
 })
 
 // Comando para aguarda inteligente com timeout otimizado

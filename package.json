@@ -15,6 +15,10 @@
     "test:performance": "cypress run --config-file cypress.config.ci.js --spec 'cypress/e2e/**/*.cy.js'",
     "test:no-cache": "cypress run --spec 'cypress/e2e/**/*.cy.js' --browser chrome --headless --config-file cypress.config.ci.js",
     "test:benchmark": "npm run test:performance && npm run test:no-cache",
+    "report:generate": "mochawesome-merge cypress/reports/*.json > cypress/reports/combined-report.json && marge cypress/reports/combined-report.json --reportDir cypress/reports --reportFilename index.html",
+    "report:clean": "rimraf cypress/reports",
+    "test:with-report": "npm run test && npm run report:generate",
+    "test:performance:with-report": "npm run test:performance && npm run report:generate",
     "cache:clear": "cypress cache clear",
     "cache:list": "cypress cache list",
     "cache:prune": "cypress cache prune"
@@ -29,6 +33,10 @@
   "author": "Desafio Cypress",
   "license": "MIT",
   "devDependencies": {
-    "cypress": "^13.17.0"
+    "cypress": "^13.17.0",
+    "mochawesome": "^7.1.3",
+    "mochawesome-merge": "^5.0.0",
+    "mochawesome-report-generator": "^6.2.0",
+    "rimraf": "^6.0.1"
   }
 }

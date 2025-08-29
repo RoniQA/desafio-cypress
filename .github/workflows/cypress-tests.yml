@@ -55,14 +55,30 @@ jobs:
           name: cypress-videos-${{ github.run_id }}
           path: cypress/videos
           if-no-files-found: ignore
-          
-      - name: Generate Performance Report
+
+      - name: Generate Detailed Reports
         if: always()
         run: |
-          echo "Performance Report - $(date)" > performance-report-${{ github.run_id }}.txt
+          echo "🚀 Gerando relatórios detalhados..."
+          
+          # Cria diretório de relatórios se não existir
+          mkdir -p cypress/reports
+          
+          # Gera relatório de performance detalhado
+          echo "📊 Performance Report - $(date)" > performance-report-${{ github.run_id }}.txt
           echo "Branch: ${{ github.ref }}" >> performance-report-${{ github.run_id }}.txt
           echo "Commit: ${{ github.sha }}" >> performance-report-${{ github.run_id }}.txt
           echo "Workflow: ${{ github.workflow }}" >> performance-report-${{ github.run_id }}.txt
+          echo "Status: ${{ job.status }}" >> performance-report-${{ github.run_id }}.txt
+          echo "Duration: ${{ job.steps.*.duration }}" >> performance-report-${{ github.run_id }}.txt
+          
+          # Gera relatório HTML se os testes passaram
+          if [ "${{ job.status }}" == "success" ]; then
+            echo "✅ Testes passaram - gerando relatório HTML..."
+            node scripts/generate-report.js
+          else
+            echo "❌ Testes falharam - relatório HTML não será gerado"
+          fi
           
       - name: Upload Performance Report
         uses: actions/upload-artifact@v4
