@@ -102,15 +102,16 @@ module.exports = defineConfig({
         }
       })
     },
-    // Configuração para relatórios Mochawesome
-    reporter: 'mochawesome',
+    // Configuração para relatórios múltiplos
+    reporter: 'cypress-multi-reporters',
     reporterOptions: {
-      mochawesome: {
-        overwrite: false,
-        html: false,
+      reporterEnabled: 'mochawesome, spec',
+      mochawesomeReporterOptions: {
+        overwrite: true,
+        html: true,
         json: true,
-        reportDir: 'cypress/reports',
-        reportFilename: '[datetime]_[name]_report.json'
+        reportDir: 'mochawesome-report',
+        reportFilename: 'mochawesome'
       }
     }
   },

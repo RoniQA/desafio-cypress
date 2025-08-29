@@ -5,9 +5,9 @@
     "passes": 3,
     "pending": 0,
     "failures": 0,
-    "start": "2025-08-29T18:35:09.775Z",
-    "end": "2025-08-29T18:35:50.317Z",
-    "duration": 40542,
+    "start": "2025-08-29T19:36:00.314Z",
+    "end": "2025-08-29T19:36:42.187Z",
+    "duration": 41873,
     "testsRegistered": 3,
     "passPercent": 100,
     "pendingPercent": 0,
@@ -18,7 +18,7 @@
   },
   "results": [
     {
-      "uuid": "e2cc1bea-2ca1-40f1-b7ef-a9cb734c8e82",
+      "uuid": "61b6d69b-5970-4db7-9062-395f13b67f66",
       "title": "",
       "fullFile": "cypress\\e2e\\performance-test.cy.js",
       "file": "cypress\\e2e\\performance-test.cy.js",
@@ -27,7 +27,7 @@
       "tests": [],
       "suites": [
         {
-          "uuid": "bdc95f32-25c1-41f6-8fc1-647c59d52f30",
+          "uuid": "89e61851-c276-4a55-bc6f-0f76622b2289",
           "title": "Performance Tests - Amazon E-commerce",
           "fullFile": "",
           "file": "",
@@ -38,7 +38,7 @@
               "title": "Deve medir performance do fluxo completo com seletores otimizados",
               "fullTitle": "Performance Tests - Amazon E-commerce Deve medir performance do fluxo completo com seletores otimizados",
               "timedOut": null,
-              "duration": 24893,
+              "duration": 24549,
               "state": "passed",
               "speed": "slow",
               "pass": true,
@@ -47,8 +47,8 @@
               "context": null,
               "code": "const startTime = performance.now();\nconst productToSearch = 'laptop';\ncy.log('🚀 Iniciando teste de performance...');\n// 1. Busca por produto - com seletores otimizados\ncy.log('1. Fazendo busca por produto (otimizado)...');\ncy.searchProduct(productToSearch);\n// 2. Seleção de produto - com seletores otimizados\ncy.log('2. Selecionando produto (otimizado)...');\ncy.selectFirstProductRobust();\n// 3. Adição ao carrinho - com seletores otimizados\ncy.log('3. Adicionando ao carrinho (otimizado)...');\ncy.addToCartRobust();\n// 4. Validação no carrinho - com seletores otimizados\ncy.log('4. Validando no carrinho (otimizado)...');\ncy.validateProductInCart(productToSearch);\n// Mede tempo total do fluxo\ncy.then(() => {\n  const endTime = performance.now();\n  const totalTime = endTime - startTime;\n  cy.log(`⏱️ Tempo total do fluxo otimizado: ${totalTime.toFixed(2)}ms`);\n  // Compara com tempo esperado (benchmark)\n  const expectedTime = 30000; // 30 segundos\n  if (totalTime < expectedTime) {\n    cy.log(`✅ Performance EXCELENTE! ${totalTime.toFixed(2)}ms < ${expectedTime}ms`);\n  } else if (totalTime < expectedTime * 1.2) {\n    cy.log(`🟡 Performance BOA! ${totalTime.toFixed(2)}ms < ${(expectedTime * 1.2).toFixed(2)}ms`);\n  } else {\n    cy.log(`🔴 Performance pode ser melhorada: ${totalTime.toFixed(2)}ms > ${expectedTime}ms`);\n  }\n});\ncy.log('✅ Teste de performance concluído!');",
               "err": {},
-              "uuid": "3674c95f-95f0-42d7-a38d-2244a4a3263c",
-              "parentUUID": "bdc95f32-25c1-41f6-8fc1-647c59d52f30",
+              "uuid": "b3779423-ba5b-48ef-94a0-9cff56e1d40d",
+              "parentUUID": "89e61851-c276-4a55-bc6f-0f76622b2289",
               "isHook": false,
               "skipped": false
             },
@@ -56,7 +56,7 @@
               "title": "Deve medir tempo de carregamento de elementos individuais",
               "fullTitle": "Performance Tests - Amazon E-commerce Deve medir tempo de carregamento de elementos individuais",
               "timedOut": null,
-              "duration": 2487,
+              "duration": 1189,
               "state": "passed",
               "speed": "fast",
               "pass": true,
@@ -65,8 +65,8 @@
               "context": null,
               "code": "cy.log('🔍 Medindo performance de elementos individuais...');\n// Mede tempo de carregamento do campo de busca\ncy.measurePageLoadTime();\ncy.get('input[type=\"text\"], input[placeholder*=\"search\"], input[aria-label*=\"search\"], #twotabsearchtextbox').should('be.visible').first();\n// Mede tempo de carregamento do botão de busca\ncy.get('input[type=\"submit\"], button[type=\"submit\"], #nav-search-submit-button, .nav-search-submit').should('be.visible').first();\n// Mede tempo de carregamento do carrinho\ncy.get('#nav-cart, .nav-cart, a[href*=\"/cart\"], [data-testid=\"cart\"]').should('be.visible').first();\ncy.log('✅ Medições de elementos concluídas!');",
               "err": {},
-              "uuid": "0e94d981-1dd7-4a8e-94b5-48e642092441",
-              "parentUUID": "bdc95f32-25c1-41f6-8fc1-647c59d52f30",
+              "uuid": "fbf25b3b-1a6f-4861-b30a-d95cbece4cd6",
+              "parentUUID": "89e61851-c276-4a55-bc6f-0f76622b2289",
               "isHook": false,
               "skipped": false
             },
@@ -74,7 +74,7 @@
               "title": "Deve validar performance com diferentes produtos",
               "fullTitle": "Performance Tests - Amazon E-commerce Deve validar performance com diferentes produtos",
               "timedOut": null,
-              "duration": 12207,
+              "duration": 15830,
               "state": "passed",
               "speed": "slow",
               "pass": true,
@@ -83,22 +83,22 @@
               "context": null,
               "code": "const products = ['book', 'phone', 'shoes'];\nproducts.forEach((product, index) => {\n  cy.log(`📱 Testando performance com produto ${index + 1}: ${product}`);\n  const startTime = performance.now();\n  // Busca rápida\n  cy.searchProduct(product);\n  // Validação rápida\n  cy.get('a[href*=\"/dp/\"]').should('have.length.greaterThan', 0);\n  cy.then(() => {\n    const endTime = performance.now();\n    const searchTime = endTime - startTime;\n    cy.log(`⏱️ Tempo de busca para \"${product}\": ${searchTime.toFixed(2)}ms`);\n  });\n});\ncy.log('✅ Testes de performance com diferentes produtos concluídos!');",
               "err": {},
-              "uuid": "5bf18a39-a5de-46ac-9058-93129e9a8321",
-              "parentUUID": "bdc95f32-25c1-41f6-8fc1-647c59d52f30",
+              "uuid": "7c67eac3-bed8-4991-8fce-b7c020ec7c80",
+              "parentUUID": "89e61851-c276-4a55-bc6f-0f76622b2289",
               "isHook": false,
               "skipped": false
             }
           ],
           "suites": [],
           "passes": [
-            "3674c95f-95f0-42d7-a38d-2244a4a3263c",
-            "0e94d981-1dd7-4a8e-94b5-48e642092441",
-            "5bf18a39-a5de-46ac-9058-93129e9a8321"
+            "b3779423-ba5b-48ef-94a0-9cff56e1d40d",
+            "fbf25b3b-1a6f-4861-b30a-d95cbece4cd6",
+            "7c67eac3-bed8-4991-8fce-b7c020ec7c80"
           ],
           "failures": [],
           "pending": [],
           "skipped": [],
-          "duration": 39587,
+          "duration": 41568,
           "root": false,
           "rootEmpty": false,
           "_timeout": 2000
@@ -132,13 +132,12 @@
     },
     "marge": {
       "options": {
-        "mochawesome": {
-          "overwrite": false,
-          "html": false,
-          "json": true,
-          "reportDir": "cypress/reports",
-          "reportFilename": "[datetime]_[name]_report.json"
-        }
+        "id": "default",
+        "overwrite": true,
+        "html": true,
+        "json": true,
+        "reportDir": "mochawesome-report",
+        "reportFilename": "mochawesome"
       },
       "version": "6.2.0"
     }

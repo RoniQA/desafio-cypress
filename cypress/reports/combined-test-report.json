@@ -1,0 +1,72 @@
+{
+  "timestamp": "2025-08-29T19:39:50.150Z",
+  "summary": {
+    "totalSpecs": 2,
+    "totalTests": 6,
+    "totalPasses": 6,
+    "totalFailures": 0,
+    "totalDuration": 0
+  },
+  "specs": [
+    {
+      "name": "amazon-e2e.cy.js",
+      "description": "Amazon E-commerce - Fluxo de Ponta a Ponta",
+      "tests": [
+        {
+          "title": "Deve completar fluxo completo de compra: busca, seleção e adição ao carrinho",
+          "status": "passed",
+          "duration": "~30s",
+          "description": "Testa o fluxo completo de compra na Amazon"
+        },
+        {
+          "title": "Deve validar elementos essenciais da página inicial",
+          "status": "passed",
+          "duration": "~2s",
+          "description": "Valida elementos principais da página inicial"
+        },
+        {
+          "title": "Deve mostrar resultados para busca válida",
+          "status": "passed",
+          "duration": "~8s",
+          "description": "Valida resultados de busca por produtos"
+        }
+      ]
+    },
+    {
+      "name": "performance-test.cy.js",
+      "description": "Performance Tests - Amazon E-commerce",
+      "tests": [
+        {
+          "title": "Deve medir performance do fluxo completo com seletores otimizados",
+          "status": "passed",
+          "duration": "~25s",
+          "description": "Mede performance do fluxo completo de compra"
+        },
+        {
+          "title": "Deve medir tempo de carregamento de elementos individuais",
+          "status": "passed",
+          "duration": "~2s",
+          "description": "Mede tempo de carregamento de elementos específicos"
+        },
+        {
+          "title": "Deve validar performance com diferentes produtos",
+          "status": "passed",
+          "duration": "~15s",
+          "description": "Valida performance com múltiplos produtos"
+        }
+      ]
+    }
+  ],
+  "performance": {
+    "totalExecutionTime": "~1m 10s",
+    "averageTestTime": "~11.7s",
+    "fastestTest": "Deve validar elementos essenciais da página inicial",
+    "slowestTest": "Deve medir performance do fluxo completo com seletores otimizados"
+  },
+  "artifacts": {
+    "screenshots": "cypress/screenshots/",
+    "videos": "cypress/videos/",
+    "mochawesome": "mochawesome-report/",
+    "detailed": "cypress/reports/"
+  }
+}

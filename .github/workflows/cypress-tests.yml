@@ -32,7 +32,7 @@ jobs:
           restore-keys: |
             cypress-cache-${{ runner.os }}-
             
-      - name: Run Cypress Tests
+      - name: Run Cypress Tests (E2E + Performance)
         uses: cypress-io/github-action@v6
         with:
           browser: chrome
@@ -72,6 +72,10 @@ jobs:
           echo "Status: ${{ job.status }}" >> performance-report-${{ github.run_id }}.txt
           echo "Duration: ${{ job.steps.*.duration }}" >> performance-report-${{ github.run_id }}.txt
           
+          # Gera relatório combinado com todos os testes
+          echo "🔄 Gerando relatório combinado..."
+          node scripts/combine-reports.js
+          
           # Gera relatório HTML se os testes passaram
           if [ "${{ job.status }}" == "success" ]; then
             echo "✅ Testes passaram - gerando relatório HTML..."
@@ -104,7 +108,9 @@ jobs:
           path: cypress/reports/
           if-no-files-found: ignore
 
-  # Job adicional para testes de performance
+  # Job adicional para testes de performance (executa apenas em pushes para main)
+  # NOTA: Os testes de performance já são executados no job principal acima
+  # Este job adicional é para métricas específicas e relatórios detalhados
   performance-tests:
     runs-on: ubuntu-latest
     needs: cypress-run
