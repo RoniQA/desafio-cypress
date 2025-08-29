@@ -88,6 +88,22 @@ jobs:
           path: performance-report-${{ github.run_id }}.txt
           if-no-files-found: ignore
 
+      - name: Upload Mochawesome Reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mochawesome-reports-${{ github.run_id }}
+          path: mochawesome-report/
+          if-no-files-found: ignore
+
+      - name: Upload Detailed Reports
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: detailed-reports-${{ github.run_id }}
+          path: cypress/reports/
+          if-no-files-found: ignore
+
   # Job adicional para testes de performance
   performance-tests:
     runs-on: ubuntu-latest
@@ -113,10 +129,21 @@ jobs:
           
       - name: Generate Performance Metrics
         run: |
-          echo "Performance Metrics Report" > performance-metrics-${{ github.run_id }}.txt
-          echo "Date: $(date)" >> performance-metrics-${{ github.run_id }}.txt
+          echo "🚀 Performance Metrics Report - $(date)" > performance-metrics-${{ github.run_id }}.txt
           echo "Branch: ${{ github.ref }}" >> performance-metrics-${{ github.run_id }}.txt
-          echo "Performance tests completed successfully!" >> performance-metrics-${{ github.run_id }}.txt
+          echo "Commit: ${{ github.sha }}" >> performance-metrics-${{ github.run_id }}.txt
+          echo "Workflow: ${{ github.workflow }}" >> performance-metrics-${{ github.run_id }}.txt
+          echo "Status: ${{ job.status }}" >> performance-metrics-${{ github.run_id }}.txt
+          echo "" >> performance-metrics-${{ github.run_id }}.txt
+          echo "📊 Performance Test Results:" >> performance-metrics-${{ github.run_id }}.txt
+          echo "✅ All performance tests completed successfully!" >> performance-metrics-${{ github.run_id }}.txt
+          echo "⏱️ Test execution time: $(date -u -d @$SECONDS +%H:%M:%S)" >> performance-metrics-${{ github.run_id }}.txt
+          echo "" >> performance-metrics-${{ github.run_id }}.txt
+          echo "🔍 Test Coverage:" >> performance-metrics-${{ github.run_id }}.txt
+          echo "- Page load time measurement" >> performance-metrics-${{ github.run_id }}.txt
+          echo "- Complete e-commerce flow performance" >> performance-metrics-${{ github.run_id }}.txt
+          echo "- Individual element performance" >> performance-metrics-${{ github.run_id }}.txt
+          echo "- Multi-product performance validation" >> performance-metrics-${{ github.run_id }}.txt
           
       - name: Upload Performance Metrics
         uses: actions/upload-artifact@v4
