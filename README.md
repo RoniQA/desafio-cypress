@@ -1,8 +1,8 @@
 # Desafio Cypress - Automação de E-commerce (Otimizado)
 
 [![Cypress Tests](https://github.com/{username}/desafio-cypress/workflows/Cypress%20E2E%20Tests/badge.svg)](https://github.com/{username}/desafio-cypress/actions)
-[![Cypress Basic](https://github.com/{username}/desafio-cypress/workflows/Cypress%20Basic%20Tests/badge.svg)](https://github.com/{username}/desafio-cypress/actions)
 [![PR Validation](https://github.com/{username}/desafio-cypress/workflows/Cypress%20PR%20Validation/badge.svg)](https://github.com/{username}/desafio-cypress/actions)
+[![Parallel Tests](https://github.com/{username}/desafio-cypress/workflows/Cypress%20Parallel%20Tests/badge.svg)](https://github.com/{username}/desafio-cypress/actions)
 
 Este projeto contém testes automatizados usando Cypress para validar o fluxo de ponta a ponta de um cliente em um portal de comércio online (Amazon.com), com **otimizações avançadas de performance**.
 
@@ -142,21 +142,14 @@ npm run cache:prune
 - **Artefatos**: Screenshots, vídeos e relatórios
 - **Performance**: Configuração otimizada para CI/CD
 
-#### 2. **Cypress Basic Tests** (Simples)
-- **Arquivo**: `.github/workflows/cypress-basic.yml`
-- **Execução**: Sequencial
-- **Artefatos**: Screenshots e vídeos
-- **Simplicidade**: Configuração básica
-- **Velocidade**: Rápido para validações simples
-
-#### 3. **Cypress PR Validation** (Pull Requests)
+#### 2. **Cypress PR Validation** (Pull Requests)
 - **Arquivo**: `.github/workflows/cypress-pr.yml`
 - **Trigger**: Apenas Pull Requests
 - **Validações**: Testes + Performance + Linting
 - **Relatórios**: Validação específica para PRs
 - **Qualidade**: Garante qualidade antes do merge
 
-#### 4. **Cypress Parallel Tests** (Paralelo - Opcional)
+#### 3. **Cypress Parallel Tests** (Paralelo - Opcional)
 - **Arquivo**: `.github/workflows/cypress-parallel.yml`
 - **Execução**: Paralela em 3 containers
 - **Trigger**: Execução manual ou agendada

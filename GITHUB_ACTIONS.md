@@ -6,9 +6,9 @@ Este documento descreve a configuração e uso do GitHub Actions para automaçã
 
 O projeto está configurado com **3 workflows principais** que executam automaticamente:
 
-1. **🔄 Cypress E2E Tests** - Workflow principal com paralelização
-2. **⚡ Cypress Basic Tests** - Workflow simples para testes básicos
-3. **✅ Cypress PR Validation** - Validação específica para Pull Requests
+1. **🔄 Cypress E2E Tests** - Workflow principal com execução sequencial
+2. **✅ Cypress PR Validation** - Validação específica para Pull Requests
+3. **🚀 Cypress Parallel Tests** - Execução paralela para performance
 
 ## 🎯 **Triggers Automáticos**
 
@@ -46,24 +46,7 @@ O projeto está configurado com **3 workflows principais** que executam automati
 
 **Tempo Estimado**: 5-10 minutos
 
-### 2. **Cypress Basic Tests** (Simples)
-
-**Arquivo**: `.github/workflows/cypress-basic.yml`
-
-**Características**:
-- **Execução**: Sequencial
-- **Artefatos**: Screenshots e vídeos
-- **Simplicidade**: Configuração básica
-- **Velocidade**: Rápido para validações simples
-
-**Quando Executa**:
-- Push na branch main
-- Pull Request para main
-- Execução manual
-
-**Tempo Estimado**: 2-5 minutos
-
-### 3. **Cypress PR Validation** (Pull Requests)
+### 2. **Cypress PR Validation** (Pull Requests)
 
 **Arquivo**: `.github/workflows/cypress-pr.yml`
 
@@ -113,8 +96,8 @@ Adicione estes badges ao seu README.md:
 
 ```markdown
 [![Cypress Tests](https://github.com/{username}/desafio-cypress/workflows/Cypress%20E2E%20Tests/badge.svg)](https://github.com/{username}/desafio-cypress/actions)
-[![Cypress Basic](https://github.com/{username}/desafio-cypress/workflows/Cypress%20Basic%20Tests/badge.svg)](https://github.com/{username}/desafio-cypress/actions)
 [![PR Validation](https://github.com/{username}/desafio-cypress/workflows/Cypress%20PR%20Validation/badge.svg)](https://github.com/{username}/desafio-cypress/actions)
+[![Parallel Tests](https://github.com/{username}/desafio-cypress/workflows/Cypress%20Parallel%20Tests/badge.svg)](https://github.com/{username}/desafio-cypress/actions)
 ```
 
 **Substitua `{username}` pelo seu nome de usuário do GitHub.**
