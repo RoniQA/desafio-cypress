@@ -1,0 +1,24 @@
+{
+  "name": "desafio-cypress",
+  "version": "1.0.0",
+  "description": "Testes automatizados para fluxo de e-commerce na Amazon",
+  "main": "index.js",
+  "scripts": {
+    "cypress:open": "cypress open",
+    "cypress:run": "cypress run",
+    "test": "cypress run --spec 'cypress/e2e/**/*.cy.js'",
+    "test:headed": "cypress run --headed --spec 'cypress/e2e/**/*.cy.js'"
+  },
+  "keywords": [
+    "cypress",
+    "e2e",
+    "testing",
+    "amazon",
+    "ecommerce"
+  ],
+  "author": "Desafio Cypress",
+  "license": "MIT",
+  "devDependencies": {
+    "cypress": "^13.17.0"
+  }
+}

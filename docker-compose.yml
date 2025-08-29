@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  cypress-tests:
+    build: .
+    container_name: cypress-ecommerce-tests
+    environment:
+      - DISPLAY=${DISPLAY}
+      - CYPRESS_baseUrl=https://www.amazon.com
+    volumes:
+      - ./cypress:/app/cypress
+      - ./cypress/videos:/app/cypress/videos
+      - ./cypress/screenshots:/app/cypress/screenshots
+    networks:
+      - cypress-network
+
+  # Serviço opcional para execução interativa
+  cypress-open:
+    build: .
+    container_name: cypress-interactive
+    environment:
+      - DISPLAY=${DISPLAY}
+      - CYPRESS_baseUrl=https://www.amazon.com
+    volumes:
+      - ./cypress:/app/cypress
+      - ./cypress/videos:/app/cypress/videos
+      - ./cypress/screenshots:/app/cypress/screenshots
+    command: npm run cypress:open
+    networks:
+      - cypress-network
+
+networks:
+  cypress-network:
+    driver: bridge
