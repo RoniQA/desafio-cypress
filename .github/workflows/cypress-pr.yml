@@ -38,16 +38,16 @@ jobs:
           
       - name: Generate PR Report
         run: |
-          echo "PR Validation Report" > pr-report.txt
-          echo "Date: $(date)" >> pr-report.txt
-          echo "PR: ${{ github.event.pull_request.number }}" >> pr-report.txt
-          echo "Branch: ${{ github.head_ref }}" >> pr-report.txt
-          echo "Base: ${{ github.base_ref }}" >> pr-report.txt
-          echo "Status: ✅ All validations passed!" >> pr-report.txt
+          echo "PR Validation Report" > pr-report-${{ github.run_id }}.txt
+          echo "Date: $(date)" >> pr-report-${{ github.run_id }}.txt
+          echo "PR: ${{ github.event.pull_request.number }}" >> pr-report-${{ github.run_id }}.txt
+          echo "Branch: ${{ github.head_ref }}" >> pr-report-${{ github.run_id }}.txt
+          echo "Base: ${{ github.base_ref }}" >> pr-report-${{ github.run_id }}.txt
+          echo "Status: ✅ All validations passed!" >> pr-report-${{ github.run_id }}.txt
           
       - name: Upload PR Report
         uses: actions/upload-artifact@v4
         with:
-          name: pr-validation-report
-          path: pr-report.txt
+          name: pr-validation-report-${{ github.run_id }}
+          path: pr-report-${{ github.run_id }}.txt
           if-no-files-found: ignore

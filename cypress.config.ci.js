@@ -32,6 +32,10 @@ module.exports = defineConfig({
     numTestsKeptInMemory: 0,
     experimentalMemoryManagement: true,
     
+    // Configurações para CI/CD
+    watchForFileChanges: false,
+    scrollBehavior: false,
+    
     setupNodeEvents(on, config) {
       // implement node event listeners here
     },
