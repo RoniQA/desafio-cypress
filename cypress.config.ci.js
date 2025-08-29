@@ -36,6 +36,10 @@ module.exports = defineConfig({
     watchForFileChanges: false,
     scrollBehavior: false,
     
+    // Configurações específicas para GitHub Actions
+    chromeWebSecurity: false,
+    modifyObstructiveCode: false,
+    
     setupNodeEvents(on, config) {
       // implement node event listeners here
     },

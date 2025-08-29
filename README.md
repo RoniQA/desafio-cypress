@@ -136,20 +136,32 @@ npm run cache:prune
 ### 📋 **Workflows Disponíveis**
 
 #### 1. **Cypress E2E Tests** (Principal)
-- **Trigger**: Push/PR na branch main
-- **Execução**: Paralela em 3 containers
+- **Arquivo**: `.github/workflows/cypress-tests.yml`
+- **Execução**: Sequencial (estável)
 - **Cache**: Otimizado para dependências
 - **Artefatos**: Screenshots, vídeos e relatórios
+- **Performance**: Configuração otimizada para CI/CD
 
 #### 2. **Cypress Basic Tests** (Simples)
-- **Trigger**: Push/PR na branch main
+- **Arquivo**: `.github/workflows/cypress-basic.yml`
 - **Execução**: Sequencial
 - **Artefatos**: Screenshots e vídeos
+- **Simplicidade**: Configuração básica
+- **Velocidade**: Rápido para validações simples
 
 #### 3. **Cypress PR Validation** (Pull Requests)
+- **Arquivo**: `.github/workflows/cypress-pr.yml`
 - **Trigger**: Apenas Pull Requests
 - **Validações**: Testes + Performance + Linting
 - **Relatórios**: Validação específica para PRs
+- **Qualidade**: Garante qualidade antes do merge
+
+#### 4. **Cypress Parallel Tests** (Paralelo - Opcional)
+- **Arquivo**: `.github/workflows/cypress-parallel.yml`
+- **Execução**: Paralela em 3 containers
+- **Trigger**: Execução manual ou agendada
+- **Performance**: Máxima velocidade para execuções especiais
+- **Uso**: Para testes de performance ou execuções em lote
 
 ### 🔧 **Configuração Automática**
 
