@@ -4,6 +4,7 @@ pipeline {
     environment {
         NODE_VERSION = '18'
         CYPRESS_VERSION = '13.17.0'
+        PARALLEL_JOBS = 3
     }
     
     stages {
@@ -29,43 +30,68 @@ pipeline {
             }
         }
         
-        stage('Run Cypress Tests') {
+        stage('Cache Management') {
             steps {
                 script {
-                    // Executa os testes em modo headless
-                    sh 'npm run test'
-                }
-            }
-            post {
-                always {
-                    // Publica os artefatos do Cypress
-                    publishHTML([
-                        allowMissing: false,
-                        alwaysLinkToLastBuild: true,
-                        keepAll: true,
-                        reportDir: 'cypress/videos',
-                        reportFiles: '*.mp4',
-                        reportName: 'Cypress Videos'
-                    ])
+                    // Lista cache atual
+                    sh 'npm run cache:list'
                     
-                    publishHTML([
-                        allowMissing: false,
-                        alwaysLinkToLastBuild: true,
-                        keepAll: true,
-                        reportDir: 'cypress/screenshots',
-                        reportFiles: '*.png',
-                        reportName: 'Cypress Screenshots'
-                    ])
+                    // Limpa cache antigo se necessário
+                    sh 'npm run cache:prune'
                 }
             }
         }
         
-        stage('Generate Test Report') {
+        stage('Run Cypress Tests - Performance Mode') {
+            parallel {
+                stage('Test Suite 1 - Fluxo Principal') {
+                    steps {
+                        sh 'npm run test:performance'
+                    }
+                    post {
+                        always {
+                            publishHTML([
+                                allowMissing: false,
+                                alwaysLinkToLastBuild: true,
+                                keepAll: true,
+                                reportDir: 'cypress/screenshots',
+                                reportFiles: '*.png',
+                                reportName: 'Performance Test Results'
+                            ])
+                        }
+                    }
+                }
+                
+                stage('Test Suite 2 - Performance Tests') {
+                    steps {
+                        sh 'npm run test:performance -- --spec "cypress/e2e/performance-test.cy.js"'
+                    }
+                }
+                
+                stage('Test Suite 3 - Fast Mode') {
+                    steps {
+                        sh 'npm run test:fast'
+                    }
+                }
+            }
+        }
+        
+        stage('Performance Benchmark') {
             steps {
                 script {
-                    // Gera relatório de testes
-                    sh 'npm install -g mochawesome-report-generator'
-                    sh 'npx cypress run --reporter mochawesome'
+                    // Executa benchmark de performance
+                    sh 'npm run test:benchmark'
+                }
+            }
+        }
+        
+        stage('Generate Performance Report') {
+            steps {
+                script {
+                    // Gera relatório de performance
+                    sh 'echo "Performance Report Generated" > performance-report.txt'
+                    sh 'echo "Date: $(date)" >> performance-report.txt'
+                    sh 'echo "Total Execution Time: $(cat cypress/results/*.json | jq -r \'.runs[].stats.duration\')" >> performance-report.txt'
                 }
             }
             post {
@@ -74,9 +100,9 @@ pipeline {
                         allowMissing: false,
                         alwaysLinkToLastBuild: true,
                         keepAll: true,
-                        reportDir: 'mochawesome-report',
-                        reportFiles: 'index.html',
-                        reportName: 'Cypress Test Report'
+                        reportDir: '.',
+                        reportFiles: 'performance-report.txt',
+                        reportName: 'Performance Report'
                     ])
                 }
             }
@@ -85,16 +111,19 @@ pipeline {
     
     post {
         always {
-            // Limpeza
+            // Limpeza e cache
             sh 'rm -rf node_modules'
-            sh 'rm -rf cypress/videos'
-            sh 'rm -rf cypress/screenshots'
+            sh 'npm run cache:clear'
+            
+            // Arquivos de performance
+            archiveArtifacts artifacts: 'performance-report.txt', fingerprint: true
         }
         success {
-            echo 'Pipeline executada com sucesso! ✅'
+            echo '🚀 Pipeline de Performance executada com sucesso! ✅'
+            echo '📊 Resultados de Performance disponíveis nos artefatos'
         }
         failure {
-            echo 'Pipeline falhou! ❌'
+            echo '❌ Pipeline de Performance falhou!'
         }
     }
 }

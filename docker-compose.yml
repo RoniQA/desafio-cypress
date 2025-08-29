@@ -1,23 +1,80 @@
 version: '3.8'
 
 services:
-  cypress-tests:
+  # Serviço principal para testes de performance
+  cypress-performance:
     build: .
-    container_name: cypress-ecommerce-tests
+    container_name: cypress-performance-tests
     environment:
       - DISPLAY=${DISPLAY}
       - CYPRESS_baseUrl=https://www.amazon.com
+      - CYPRESS_video=false
+      - CYPRESS_screenshotOnRunFailure=true
+      - CYPRESS_experimentalRunAllSpecs=true
     volumes:
       - ./cypress:/app/cypress
-      - ./cypress/videos:/app/cypress/videos
       - ./cypress/screenshots:/app/cypress/screenshots
+      - cypress-cache:/root/.cache/Cypress
+    command: npm run test:performance
     networks:
       - cypress-network
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 4G
+        reservations:
+          cpus: '1.0'
+          memory: 2G
 
-  # Serviço opcional para execução interativa
-  cypress-open:
+  # Serviço para testes rápidos (sem vídeo/screenshot)
+  cypress-fast:
     build: .
-    container_name: cypress-interactive
+    container_name: cypress-fast-tests
+    environment:
+      - DISPLAY=${DISPLAY}
+      - CYPRESS_baseUrl=https://www.amazon.com
+      - CYPRESS_video=false
+      - CYPRESS_screenshotOnRunFailure=false
+      - CYPRESS_experimentalRunAllSpecs=true
+    volumes:
+      - ./cypress:/app/cypress
+      - cypress-cache:/root/.cache/Cypress
+    command: npm run test:fast
+    networks:
+      - cypress-network
+    deploy:
+      resources:
+        limits:
+          cpus: '1.5'
+          memory: 3G
+
+  # Serviço para testes de benchmark
+  cypress-benchmark:
+    build: .
+    container_name: cypress-benchmark-tests
+    environment:
+      - DISPLAY=${DISPLAY}
+      - CYPRESS_baseUrl=https://www.amazon.com
+      - CYPRESS_video=false
+      - CYPRESS_screenshotOnRunFailure=false
+      - CYPRESS_experimentalRunAllSpecs=true
+    volumes:
+      - ./cypress:/app/cypress
+      - cypress-cache:/root/.cache/Cypress
+    command: npm run test:benchmark
+    networks:
+      - cypress-network
+    deploy:
+      resources:
+        limits:
+          cpus: '2.5'
+          memory: 5G
+
+  # Serviço para execução interativa (desenvolvimento)
+  cypress-interactive:
+    build: .
+    container_name: cypress-interactive-dev
     environment:
       - DISPLAY=${DISPLAY}
       - CYPRESS_baseUrl=https://www.amazon.com
@@ -25,9 +82,35 @@ services:
       - ./cypress:/app/cypress
       - ./cypress/videos:/app/cypress/videos
       - ./cypress/screenshots:/app/cypress/screenshots
+      - cypress-cache:/root/.cache/Cypress
     command: npm run cypress:open
     networks:
       - cypress-network
+    ports:
+      - "8080:8080"
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 2G
+
+  # Serviço para limpeza de cache
+  cypress-cache-clean:
+    build: .
+    container_name: cypress-cache-cleaner
+    environment:
+      - DISPLAY=${DISPLAY}
+    volumes:
+      - cypress-cache:/root/.cache/Cypress
+    command: npm run cache:clear
+    networks:
+      - cypress-network
+    profiles:
+      - maintenance
+
+volumes:
+  cypress-cache:
+    driver: local
 
 networks:
   cypress-network:

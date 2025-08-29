@@ -1,0 +1,141 @@
+name: Cypress E2E Tests
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch: # Permite execução manual
+
+jobs:
+  cypress-run:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # Executa testes em paralelo para maior velocidade
+        containers: [1, 2, 3]
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          
+      - name: Install Dependencies
+        run: npm ci
+        
+      - name: Cypress Cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/Cypress
+          key: cypress-cache-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            cypress-cache-${{ runner.os }}-
+            
+      - name: Run Cypress Tests
+        uses: cypress-io/github-action@v6
+        with:
+          browser: chrome
+          headless: true
+          record: false
+          parallel: true
+          group: 'Actions example'
+          spec: 'cypress/e2e/**/*.cy.js'
+          config-file: cypress.config.ci.js
+          wait-on: 'http://localhost:3000'
+          wait-on-timeout: 120
+          
+      - name: Upload Screenshots
+        uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: cypress-screenshots
+          path: cypress/screenshots
+          if-no-files-found: ignore
+          
+      - name: Upload Videos
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cypress-videos
+          path: cypress/videos
+          if-no-files-found: ignore
+          
+      - name: Generate Performance Report
+        if: always()
+        run: |
+          echo "Performance Report - $(date)" > performance-report.txt
+          echo "Branch: ${{ github.ref }}" >> performance-report.txt
+          echo "Commit: ${{ github.sha }}" >> performance-report.txt
+          echo "Workflow: ${{ github.workflow }}" >> performance-report.txt
+          
+      - name: Upload Performance Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: performance-report
+          path: performance-report.txt
+          if-no-files-found: ignore
+
+  # Job adicional para testes de performance
+  performance-tests:
+    runs-on: ubuntu-latest
+    needs: cypress-run
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          
+      - name: Install Dependencies
+        run: npm ci
+        
+      - name: Run Performance Tests
+        run: |
+          npm run test:performance
+          
+      - name: Generate Performance Metrics
+        run: |
+          echo "Performance Metrics Report" > performance-metrics.txt
+          echo "Date: $(date)" >> performance-metrics.txt
+          echo "Branch: ${{ github.ref }}" >> performance-metrics.txt
+          echo "Performance tests completed successfully!" >> performance-metrics.txt
+          
+      - name: Upload Performance Metrics
+        uses: actions/upload-artifact@v4
+        with:
+          name: performance-metrics
+          path: performance-metrics.txt
+          if-no-files-found: ignore
+
+  # Job para notificações
+  notify:
+    runs-on: ubuntu-latest
+    needs: [cypress-run, performance-tests]
+    if: always()
+    
+    steps:
+      - name: Notify Success
+        if: needs.cypress-run.result == 'success' && needs.performance-tests.result == 'success'
+        run: |
+          echo "🎉 All tests passed successfully!"
+          echo "✅ Cypress tests: PASSED"
+          echo "✅ Performance tests: PASSED"
+          
+      - name: Notify Failure
+        if: needs.cypress-run.result == 'failure' || needs.performance-tests.result == 'failure'
+        run: |
+          echo "❌ Some tests failed!"
+          echo "Cypress tests: ${{ needs.cypress-run.result }}"
+          echo "Performance tests: ${{ needs.performance-tests.result }}"

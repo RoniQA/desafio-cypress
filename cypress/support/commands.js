@@ -14,22 +14,22 @@ Cypress.Commands.add('waitForPageLoad', () => {
   cy.get('body').should('be.visible')
 })
 
-// Comando para fazer busca de produto - otimizado
+// Comando para fazer busca de produto - otimizado com seletores funcionais
 Cypress.Commands.add('searchProduct', (productName) => {
-  // Tenta diferentes seletores para o campo de busca
+  // Usa seletores que funcionam na Amazon
   cy.get('input[type="text"], input[placeholder*="search"], input[aria-label*="search"], #twotabsearchtextbox')
     .should('be.visible')
-    .first() // Pega apenas o primeiro elemento encontrado
+    .first()
     .clear()
     .type(productName)
   
-  // Tenta diferentes seletores para o botão de busca, pegando apenas o primeiro
+  // Botão de busca
   cy.get('input[type="submit"], button[type="submit"], #nav-search-submit-button, .nav-search-submit')
     .should('be.visible')
-    .first() // Pega apenas o primeiro elemento encontrado
+    .first()
     .click()
   
-  // Aguarda os resultados da busca carregarem
+  // Aguarda resultados usando seletor que funciona
   cy.get('a[href*="/dp/"]').should('have.length.greaterThan', 0)
 })
 
@@ -52,11 +52,10 @@ Cypress.Commands.add('addToCart', () => {
   // Tenta diferentes seletores para o botão de adicionar ao carrinho
   cy.get('#add-to-cart-button, .add-to-cart, button[data-action="add-to-cart"], input[value*="Add to Cart"]')
     .should('be.visible')
-    .first() // Pega apenas o primeiro elemento encontrado
+    .first()
     .click()
   
   // Aguarda confirmação de adição ao carrinho - validação mais flexível
-  // Pode ser uma mensagem de sucesso, confirmação, ou mudança na URL
   cy.get('body').should('satisfy', (body) => {
     const bodyText = body.text().toLowerCase()
     return bodyText.includes('added') || 
@@ -71,8 +70,8 @@ Cypress.Commands.add('goToCart', () => {
   // Tenta diferentes seletores para o carrinho
   cy.get('#nav-cart, .nav-cart, a[href*="/cart"], [data-testid="cart"]')
     .should('exist')
-    .first() // Pega apenas o primeiro elemento encontrado
-    .click({ force: true }) // Força o clique mesmo se estiver coberto
+    .first()
+    .click({ force: true })
   
   // Aguarda a página do carrinho carregar - validação mais flexível
   cy.get('body').should('satisfy', (body) => {
@@ -89,7 +88,6 @@ Cypress.Commands.add('validateProductInCart', (expectedProductName) => {
   cy.goToCart()
   
   // Depois valida se o produto está no carrinho - validação mais flexível
-  // Pode ser o nome do produto ou parte dele
   cy.get('body').should('satisfy', (body) => {
     const bodyText = body.text().toLowerCase()
     const searchTerm = expectedProductName.toLowerCase()
@@ -97,4 +95,20 @@ Cypress.Commands.add('validateProductInCart', (expectedProductName) => {
            bodyText.includes('item') ||
            bodyText.includes('product')
   })
+})
+
+// Comando para teste de performance - mede tempo de carregamento
+Cypress.Commands.add('measurePageLoadTime', () => {
+  const startTime = performance.now()
+  
+  cy.get('body').should('be.visible').then(() => {
+    const endTime = performance.now()
+    const loadTime = endTime - startTime
+    cy.log(`⏱️ Tempo de carregamento da página: ${loadTime.toFixed(2)}ms`)
+  })
+})
+
+// Comando para aguarda inteligente com timeout otimizado
+Cypress.Commands.add('waitForElement', (selector, timeout = 5000) => {
+  cy.get(selector, { timeout }).should('be.visible')
 })

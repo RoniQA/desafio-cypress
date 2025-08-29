@@ -7,7 +7,17 @@
     "cypress:open": "cypress open",
     "cypress:run": "cypress run",
     "test": "cypress run --spec 'cypress/e2e/**/*.cy.js'",
-    "test:headed": "cypress run --headed --spec 'cypress/e2e/**/*.cy.js'"
+    "test:headed": "cypress run --headed --spec 'cypress/e2e/**/*.cy.js'",
+    "test:parallel": "cypress run --parallel --record --key YOUR_RECORD_KEY",
+    "test:fast": "cypress run --spec 'cypress/e2e/**/*.cy.js' --browser chrome --headless --no-video --no-screenshot",
+    "test:ci": "cypress run --spec 'cypress/e2e/**/*.cy.js' --browser chrome --headless --record --key YOUR_RECORD_KEY",
+    "test:split": "cypress run --spec 'cypress/e2e/**/*.cy.js' --browser chrome --headless --parallel --record --key YOUR_RECORD_KEY",
+    "test:performance": "cypress run --config-file cypress.config.ci.js --spec 'cypress/e2e/**/*.cy.js'",
+    "test:no-cache": "cypress run --spec 'cypress/e2e/**/*.cy.js' --browser chrome --headless --no-video --no-screenshot --config-file cypress.config.ci.js",
+    "test:benchmark": "npm run test:performance && npm run test:no-cache",
+    "cache:clear": "cypress cache clear",
+    "cache:list": "cypress cache list",
+    "cache:prune": "cypress cache prune"
   },
   "keywords": [
     "cypress",
@@ -19,6 +29,7 @@
   "author": "Desafio Cypress",
   "license": "MIT",
   "devDependencies": {
-    "cypress": "^13.17.0"
+    "cypress": "^13.17.0",
+    "cypress-parallel": "^0.0.3"
   }
 }
