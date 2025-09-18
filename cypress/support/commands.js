@@ -85,45 +85,60 @@ Cypress.Commands.add('addToCart', () => {
 // Comando alternativo para adicionar ao carrinho - mais robusto
 Cypress.Commands.add('addToCartRobust', () => {
   cy.log('🛒 Tentando adicionar produto ao carrinho com estratégia robusta...')
-  
-  // Aguarda a página carregar completamente
   cy.wait(3000)
-  
-  // Estratégia 1: Botão principal de adicionar ao carrinho
-  cy.get('#add-to-cart-button, .add-to-cart, button[data-action="add-to-cart"], input[value*="Add to Cart"]')
-    .should('be.visible')
-    .should('not.be.disabled')
-    .first()
-    .scrollIntoView()
-    .then(($button) => {
-      // Verifica se o botão está realmente clicável
-      const rect = $button[0].getBoundingClientRect()
-      const isClickable = rect.width > 0 && rect.height > 0
-      
-      if (isClickable) {
-        cy.wrap($button).click({ force: true })
+
+  // Função auxiliar para tentar expandir acordeões ocultos
+  function expandAccordionIfNeeded() {
+    cy.get('input#add-to-cart-button, #add-to-cart-button, .add-to-cart, button[data-action="add-to-cart"], input[value*="Add to Cart"]')
+      .then($btns => {
+        if ($btns.length > 0) {
+          const $btn = $btns[0];
+          // Se o botão está invisível por causa de um pai oculto, tenta expandir
+          if ($btn && !$btn.offsetParent) {
+            // Procura por acordeão pai
+            const $accordion = $btn.closest('.a-accordion-inner, .accordion-row-content, [aria-expanded="false"]');
+            if ($accordion) {
+              // Procura botão de expandir
+              const $expandBtn = $accordion.parentElement && $accordion.parentElement.querySelector('button, .a-accordion-row-a11y');
+              if ($expandBtn) {
+                cy.wrap($expandBtn).click({ force: true });
+                cy.wait(1000); // Aguarda expandir
+              }
+            }
+          }
+        }
+      });
+  }
+
+  // Primeiro tenta expandir acordeão se necessário
+  expandAccordionIfNeeded();
+
+  // Agora tenta clicar no botão visível
+  cy.get('input#add-to-cart-button, #add-to-cart-button, .add-to-cart, button[data-action="add-to-cart"], input[value*="Add to Cart"]')
+    .should('exist')
+    .then($btns => {
+      // Filtra botões visíveis
+      const visibleBtn = Array.from($btns).find(btn => btn.offsetParent !== null);
+      if (visibleBtn) {
+        cy.wrap(visibleBtn).scrollIntoView().should('be.visible').should('not.be.disabled').click({ force: true });
       } else {
-        // Estratégia 2: Tenta próximo botão válido
-        cy.get('#add-to-cart-button, .add-to-cart, button[data-action="add-to-cart"], input[value*="Add to Cart"]')
-          .eq(1)
-          .should('be.visible')
-          .scrollIntoView()
-          .click({ force: true })
+        // Se nenhum botão visível, tenta clicar no primeiro mesmo assim
+        cy.wrap($btns[0]).scrollIntoView().click({ force: true });
       }
-    })
+    });
 
   // Aguarda confirmação com timeout maior
   cy.get('body', { timeout: 10000 }).should('satisfy', (body) => {
-    const bodyText = body.text().toLowerCase()
+    const bodyText = body.text().toLowerCase();
     return bodyText.includes('added') ||
            bodyText.includes('cart') ||
            bodyText.includes('success') ||
            bodyText.includes('confirm') ||
            bodyText.includes('shopping cart') ||
            bodyText.includes('item') ||
-           bodyText.includes('product')
-  })
-})
+           bodyText.includes('product');
+  });
+});
 
 // Comando para ir ao carrinho - otimizado
 Cypress.Commands.add('goToCart', () => {
