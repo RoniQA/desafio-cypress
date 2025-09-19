@@ -15,7 +15,7 @@
     "test:performance": "cypress run --config-file cypress.config.ci.js --spec 'cypress/e2e/**/*.cy.js'",
     "test:no-cache": "cypress run --spec 'cypress/e2e/**/*.cy.js' --browser chrome --headless --config-file cypress.config.ci.js",
     "test:benchmark": "npm run test:performance && npm run test:no-cache",
-  "report:generate": "echo 'Allure report generation script aqui'",
+    "report:generate": "echo 'Allure report generation script aqui'",
     "report:clean": "rimraf cypress/reports",
     "test:with-report": "npm run test && npm run report:generate",
     "test:performance:with-report": "npm run test:performance && npm run report:generate",
@@ -34,9 +34,9 @@
   "author": "Desafio Cypress",
   "license": "MIT",
   "devDependencies": {
+    "@shelex/cypress-allure-plugin": "^2.41.2",
     "cypress": "^13.17.0",
     "cypress-multi-reporters": "^2.0.5",
-
     "rimraf": "^6.0.1"
   }
 }
