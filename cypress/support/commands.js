@@ -87,31 +87,11 @@ Cypress.Commands.add('addToCartRobust', () => {
   cy.log('🛒 Tentando adicionar produto ao carrinho com estratégia robusta...')
   cy.wait(3000)
 
-  // Função auxiliar para tentar expandir acordeões ocultos
-  function expandAccordionIfNeeded() {
-    cy.get('input#add-to-cart-button, #add-to-cart-button, .add-to-cart, button[data-action="add-to-cart"], input[value*="Add to Cart"]')
-      .then($btns => {
-        if ($btns.length > 0) {
-          const $btn = $btns[0];
-          // Se o botão está invisível por causa de um pai oculto, tenta expandir
-          if ($btn && !$btn.offsetParent) {
-            // Procura por acordeão pai
-            const $accordion = $btn.closest('.a-accordion-inner, .accordion-row-content, [aria-expanded="false"]');
-            if ($accordion) {
-              // Procura botão de expandir
-              const $expandBtn = $accordion.parentElement && $accordion.parentElement.querySelector('button, .a-accordion-row-a11y');
-              if ($expandBtn) {
-                cy.wrap($expandBtn).click({ force: true });
-                cy.wait(1000); // Aguarda expandir
-              }
-            }
-          }
-        }
-      });
-  }
-
-  // Primeiro tenta expandir acordeão se necessário
-  expandAccordionIfNeeded();
+  // Expande todos os acordeões fechados que possam ocultar botões de adicionar ao carrinho
+  cy.get('.a-accordion-row-a11y, button[aria-expanded="false"], .a-accordion .a-expander-header:not([aria-expanded="true"])').each($el => {
+    cy.wrap($el).click({ force: true })
+    cy.wait(500)
+  })
 
   // Agora tenta clicar no botão visível
   cy.get('input#add-to-cart-button, #add-to-cart-button, .add-to-cart, button[data-action="add-to-cart"], input[value*="Add to Cart"]')

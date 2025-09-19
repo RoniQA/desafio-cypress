@@ -36,13 +36,48 @@ jobs:
           restore-keys: |
             cypress-cache-${{ runner.os }}-
             
-      - name: Run Cypress Tests
+
+      - name: Run Functional Tests (Allure)
         uses: cypress-io/github-action@v6
         with:
           browser: chrome
           record: false
-          spec: 'cypress/e2e/**/*.cy.js'
+          spec: 'cypress/e2e/amazon-e2e.cy.js'
           config-file: cypress.config.ci.js
+
+      - name: Generate Allure Report (Functional)
+        run: |
+          npx allure generate allure-results -o allure-report-functional --clean
+        shell: bash
+
+      - name: Upload Allure Report (Functional)
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-report-functional-${{ matrix.containers }}-${{ github.run_id }}
+          path: allure-report-functional
+          if-no-files-found: ignore
+        description: 'Relatório Allure dos testes funcionais'
+
+      - name: Run Performance Tests (Allure)
+        uses: cypress-io/github-action@v6
+        with:
+          browser: chrome
+          record: false
+          spec: 'cypress/e2e/performance-test.cy.js'
+          config-file: cypress.config.ci.js
+
+      - name: Generate Allure Report (Performance)
+        run: |
+          npx allure generate allure-results -o allure-report-performance --clean
+        shell: bash
+
+      - name: Upload Allure Report (Performance)
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-report-performance-${{ matrix.containers }}-${{ github.run_id }}
+          path: allure-report-performance
+          if-no-files-found: ignore
+        description: 'Relatório Allure dos testes de performance'
           
       - name: Upload Screenshots
         uses: actions/upload-artifact@v4
