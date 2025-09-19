@@ -81,7 +81,7 @@ function combineAllReports() {
       artifacts: {
         screenshots: 'cypress/screenshots/',
         videos: 'cypress/videos/',
-        mochawesome: 'mochawesome-report/',
+  // mochawesome: 'mochawesome-report/',
         detailed: 'cypress/reports/'
       }
     }
@@ -224,8 +224,8 @@ function generateCombinedHTMLReport(reportData) {
                     ${reportData.artifacts.videos}
                 </div>
                 <div class="artifact-item">
-                    <strong>Mochawesome</strong><br>
-                    ${reportData.artifacts.mochawesome}
+                    <strong>Allure</strong><br>
+                    ${reportData.artifacts.allure || ''}
                 </div>
                 <div class="artifact-item">
                     <strong>Relatórios Detalhados</strong><br>

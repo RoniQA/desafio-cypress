@@ -13,7 +13,9 @@
 // https://on.cypress.io/configuration
 // ***********************************************************
 
-// Import commands.js using ES2015 syntax:
+
+// Import Allure plugin
+import '@shelex/cypress-allure-plugin';
 import './commands'
 
 // Alternatively you can use CommonJS syntax:

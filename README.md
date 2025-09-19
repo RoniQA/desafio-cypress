@@ -222,6 +222,7 @@ O projeto está configurado para executar automaticamente:
 ## 📊 Relatórios e Métricas
 
 ### 📈 **Relatórios Automáticos**
+- **Allure Report**: Relatórios detalhados e interativos dos testes Cypress
 - **Performance Report**: Métricas de tempo de execução
 - **Jenkins Pipeline**: Execução paralela com relatórios
 - **Docker Metrics**: Monitoramento de recursos
