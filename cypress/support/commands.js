@@ -109,30 +109,53 @@ Cypress.Commands.add('addToCartRobust', () => {
   ];
 
 
-  // Função recursiva para tentar clicar em cada botão possível, expandindo acordeões antes de cada tentativa
+
+  // Função para expandir o acordeão pai do botão invisível e tentar clicar
   function tryClickButton(index = 0) {
     if (index >= selectors.length) {
       cy.log('❌ Nenhum botão de adicionar ao carrinho visível encontrado.');
       return;
     }
-    // Expande acordeões antes de cada tentativa
-    cy.get('button, .a-accordion-row-a11y, button[aria-expanded="false"], .a-accordion .a-expander-header:not([aria-expanded="true"])').each($el => {
-      const text = $el.textContent?.toLowerCase() || '';
-      if (text.includes('opção') || text.includes('option') || text.includes('expandir') || text.includes('expand') || text.includes('ver mais') || text.includes('see more')) {
-        cy.wrap($el).click({ force: true });
-        cy.wait(500);
-      }
-    }).then(() => {
-      cy.get('body').then($body => {
-        const $btn = $body.find(selectors[index]+':visible').first();
-        if ($btn.length) {
+    cy.get('body').then($body => {
+      // Procura o botão, mesmo invisível
+      const $btn = $body.find(selectors[index]).first();
+      if ($btn.length) {
+        if ($btn.is(':visible')) {
           cy.wrap($btn).scrollIntoView();
           cy.wait(300);
           cy.wrap($btn).should('be.visible').should('not.be.disabled').click({ force: true });
         } else {
-          tryClickButton(index + 1);
+          // Sobe até o acordeão pai e expande
+          let $parent = $btn.parent();
+          let foundAccordion = false;
+          for (let i = 0; i < 5 && $parent.length && !foundAccordion; i++) {
+            if ($parent.is('[aria-expanded="false"], .a-accordion-inner[style*="display: none"]')) {
+              foundAccordion = true;
+              // Procura botão de expandir
+              const $expandBtn = $parent.parent().find('button, .a-accordion-row-a11y').first();
+              if ($expandBtn.length) {
+                cy.wrap($expandBtn).click({ force: true });
+                cy.wait(500);
+              }
+            }
+            $parent = $parent.parent();
+          }
+          // Após expandir, tenta novamente
+          cy.wait(500);
+          cy.get('body').then($body2 => {
+            const $btn2 = $body2.find(selectors[index]+':visible').first();
+            if ($btn2.length) {
+              cy.wrap($btn2).scrollIntoView();
+              cy.wait(300);
+              cy.wrap($btn2).should('be.visible').should('not.be.disabled').click({ force: true });
+            } else {
+              tryClickButton(index + 1);
+            }
+          });
         }
-      });
+      } else {
+        tryClickButton(index + 1);
+      }
     });
   }
 
