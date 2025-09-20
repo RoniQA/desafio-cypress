@@ -108,21 +108,31 @@ Cypress.Commands.add('addToCartRobust', () => {
     '.a-button-inner input[type="submit"]'
   ];
 
-  // Função recursiva para tentar clicar em cada botão possível
+
+  // Função recursiva para tentar clicar em cada botão possível, expandindo acordeões antes de cada tentativa
   function tryClickButton(index = 0) {
     if (index >= selectors.length) {
       cy.log('❌ Nenhum botão de adicionar ao carrinho visível encontrado.');
       return;
     }
-    cy.get('body').then($body => {
-      const $btn = $body.find(selectors[index]+':visible').first();
-      if ($btn.length) {
-        cy.wrap($btn).scrollIntoView();
-        cy.wait(300);
-        cy.wrap($btn).should('be.visible').should('not.be.disabled').click({ force: true });
-      } else {
-        tryClickButton(index + 1);
+    // Expande acordeões antes de cada tentativa
+    cy.get('button, .a-accordion-row-a11y, button[aria-expanded="false"], .a-accordion .a-expander-header:not([aria-expanded="true"])').each($el => {
+      const text = $el.textContent?.toLowerCase() || '';
+      if (text.includes('opção') || text.includes('option') || text.includes('expandir') || text.includes('expand') || text.includes('ver mais') || text.includes('see more')) {
+        cy.wrap($el).click({ force: true });
+        cy.wait(500);
       }
+    }).then(() => {
+      cy.get('body').then($body => {
+        const $btn = $body.find(selectors[index]+':visible').first();
+        if ($btn.length) {
+          cy.wrap($btn).scrollIntoView();
+          cy.wait(300);
+          cy.wrap($btn).should('be.visible').should('not.be.disabled').click({ force: true });
+        } else {
+          tryClickButton(index + 1);
+        }
+      });
     });
   }
 
