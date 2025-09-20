@@ -100,21 +100,33 @@ Cypress.Commands.add('addToCartRobust', () => {
   // Tenta clicar em todos os botões visíveis de adicionar ao carrinho, garantindo cy.wrap a cada ação
   cy.get('input#add-to-cart-button, #add-to-cart-button, .add-to-cart, button[data-action="add-to-cart"], input[value*="Add to Cart"], .a-button-input, .a-button-inner input[type="submit"]')
     .filter(':visible')
-    .each($btn => {
-      cy.wrap($btn).scrollIntoView().then($el => {
-        cy.wrap($el).should('be.visible').should('not.be.disabled').click({ force: true });
-      });
+    .each(($btn, idx) => {
+      cy.wrap($btn).scrollIntoView();
+      cy.wait(300); // Aguarda a página estabilizar
+      // Rebusca o botão pelo índice
+      cy.get('input#add-to-cart-button, #add-to-cart-button, .add-to-cart, button[data-action="add-to-cart"], input[value*="Add to Cart"], .a-button-input, .a-button-inner input[type="submit"]')
+        .filter(':visible')
+        .eq(idx)
+        .should('be.visible')
+        .should('not.be.disabled')
+        .click({ force: true });
     });
 
   // Tenta também clicar em botões de adicionar ao carrinho em contextos alternativos (variações, vendedores)
-  cy.get('div[aria-expanded="false"], .a-accordion-inner[style*="display: none"]').each($panel => {
+  cy.get('div[aria-expanded="false"], .a-accordion-inner[style*="display: none"]').each(($panel, pidx) => {
     cy.wrap($panel).invoke('attr', 'aria-expanded', 'true');
+    cy.wait(300);
     cy.wrap($panel).find('input#add-to-cart-button, .add-to-cart, button[data-action="add-to-cart"], input[value*="Add to Cart"]')
       .filter(':visible')
-      .each($btn => {
-        cy.wrap($btn).scrollIntoView().then($el => {
-          cy.wrap($el).should('be.visible').should('not.be.disabled').click({ force: true });
-        });
+      .each(($btn, bidx) => {
+        cy.wrap($btn).scrollIntoView();
+        cy.wait(300);
+        cy.wrap($panel).find('input#add-to-cart-button, .add-to-cart, button[data-action="add-to-cart"], input[value*="Add to Cart"]')
+          .filter(':visible')
+          .eq(bidx)
+          .should('be.visible')
+          .should('not.be.disabled')
+          .click({ force: true });
       });
   });
 
