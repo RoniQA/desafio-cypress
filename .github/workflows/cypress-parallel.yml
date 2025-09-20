@@ -56,7 +56,6 @@ jobs:
           name: allure-report-functional-${{ matrix.containers }}-${{ github.run_id }}
           path: allure-report-functional
           if-no-files-found: ignore
-        description: 'Relatório Allure dos testes funcionais'
 
       - name: Run Performance Tests (Allure)
         uses: cypress-io/github-action@v6
@@ -77,7 +76,6 @@ jobs:
           name: allure-report-performance-${{ matrix.containers }}-${{ github.run_id }}
           path: allure-report-performance
           if-no-files-found: ignore
-        description: 'Relatório Allure dos testes de performance'
           
       - name: Upload Screenshots
         uses: actions/upload-artifact@v4

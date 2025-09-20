@@ -111,16 +111,15 @@ Cypress.Commands.add('addToCartRobust', () => {
 
 
 
-  // 1. Expande todos os acordeões possíveis antes de buscar botões
-  cy.log('🔎 Expandindo todos os acordeões possíveis antes de buscar botões...');
-  cy.get('button, .a-accordion-row-a11y, button[aria-expanded="false"], .a-accordion .a-expander-header:not([aria-expanded="true"])').each($el => {
-    const text = $el.textContent?.toLowerCase() || '';
-    if (text.includes('opção') || text.includes('option') || text.includes('expandir') || text.includes('expand') || text.includes('ver mais') || text.includes('see more')) {
-      cy.wrap($el).click({ force: true });
-      cy.wait(500);
-    }
+  // 1. Expande todos os acordeões fechados por seletor de atributo
+  cy.log('🔎 Expandindo todos os acordeões fechados por seletor...');
+  cy.get('[aria-expanded="false"], .a-accordion-inner[style*="display: none"], .a-accordion .a-expander-header:not([aria-expanded="true"])').each($el => {
+    cy.wrap($el).scrollIntoView().click({ force: true });
+    cy.wait(400);
   }).then(() => {
-    // 2. Buscar todos os botões visíveis e clicar no primeiro
+    // 2. Espera para garantir que DOM foi atualizado
+    cy.wait(800);
+    // 3. Buscar todos os botões visíveis e clicar no primeiro
     cy.log('🔎 Buscando botões de adicionar ao carrinho visíveis...');
     let found = false;
     cy.get('body').then($body => {
@@ -130,17 +129,41 @@ Cypress.Commands.add('addToCartRobust', () => {
           found = true;
           cy.log('✅ Botão encontrado: ' + selector);
           cy.wrap($btn).scrollIntoView();
-          cy.wait(300);
+          cy.wait(200);
           cy.wrap($btn).should('be.visible').should('not.be.disabled').click({ force: true });
           break;
         }
       }
       if (!found) {
-        cy.log('❌ Nenhum botão de adicionar ao carrinho visível encontrado. Debug:');
-        for (const selector of selectors) {
-          const $btns = $body.find(selector);
-          cy.log(`Selector ${selector}: ${$btns.length} encontrados.`);
-        }
+        cy.log('❌ Nenhum botão de adicionar ao carrinho visível encontrado. Forçando abertura de todos os acordeões.');
+        // 4. Força abertura de todos os acordeões novamente
+        cy.get('.a-accordion .a-expander-header, .a-accordion-row-a11y, button[aria-expanded="false"]').each($el2 => {
+          cy.wrap($el2).click({ force: true });
+          cy.wait(300);
+        }).then(() => {
+          cy.wait(800);
+          cy.get('body').then($body2 => {
+            let found2 = false;
+            for (const selector of selectors) {
+              const $btn2 = $body2.find(selector+':visible').first();
+              if ($btn2.length) {
+                found2 = true;
+                cy.log('✅ Botão encontrado após forçar acordeão: ' + selector);
+                cy.wrap($btn2).scrollIntoView();
+                cy.wait(200);
+                cy.wrap($btn2).should('be.visible').should('not.be.disabled').click({ force: true });
+                break;
+              }
+            }
+            if (!found2) {
+              cy.log('❌ Ainda não foi possível encontrar botão visível. Debug:');
+              for (const selector of selectors) {
+                const $btns = $body2.find(selector);
+                cy.log(`Selector ${selector}: ${$btns.length} encontrados.`);
+              }
+            }
+          });
+        });
       }
     });
   });
