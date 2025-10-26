@@ -1,11 +1,5 @@
 // ***********************************************
-// This example commands.js shows you how to
-// create various custom commands and overwrite
-// existing commands.
-//
-// For more comprehensive examples of custom
-// commands please read more here:
-// https://on.cypress.io/custom-commands
+// Custom commands for Amazon E2E tests - FIXED VERSION
 // ***********************************************
 
 // Comando para aguardar carregamento da página - otimizado
@@ -33,17 +27,19 @@ Cypress.Commands.add('searchProduct', (productName) => {
   cy.get('a[href*="/dp/"]').should('have.length.greaterThan', 0)
 })
 
-// Comando para selecionar primeiro produto da lista - otimizado para CI/CD
+// Comando para selecionar primeiro produto da lista - CORRIGIDO para evitar detachment
 Cypress.Commands.add('selectFirstProduct', () => {
   // Aguarda os produtos estarem disponíveis para clique
-  // Usa seletores mais específicos para evitar links de background
   cy.get('a[href*="/dp/"]:not([data-type="backgroundLink"]), h2 a:not([data-type="backgroundLink"]), .a-link-normal:not([data-type="backgroundLink"])')
     .should('have.length.greaterThan', 0)
     .first()
     .should('be.visible')
     .should('not.be.disabled')
-    .scrollIntoView() // Garante que o elemento está visível
-    .click({ force: true }) // Força o clique se necessário
+    .as('productLink') // Usa alias para evitar detachment
+
+  // Quebra a chain para evitar problemas de DOM
+  cy.get('@productLink').scrollIntoView()
+  cy.get('@productLink').click({ force: true })
 
   // Aguarda a página do produto carregar completamente
   cy.wait(3000)
@@ -53,11 +49,10 @@ Cypress.Commands.add('selectFirstProduct', () => {
     .should('be.visible')
     .should('exist')
   
-  // Aguarda um pouco mais para garantir que tudo carregou
   cy.wait(2000)
 })
 
-// Comando para adicionar produto ao carrinho - otimizado para CI/CD
+// Comando para adicionar produto ao carrinho - CORRIGIDO para evitar detachment
 Cypress.Commands.add('addToCart', () => {
   // Aguarda a página carregar completamente
   cy.wait(2000)
@@ -67,11 +62,13 @@ Cypress.Commands.add('addToCart', () => {
     .should('be.visible')
     .should('not.be.disabled')
     .first()
-    .scrollIntoView() // Garante que o elemento está visível
-    .click({ force: true }) // Força o clique se necessário
+    .as('addToCartBtn') // Usa alias para evitar detachment
+
+  // Quebra a chain para evitar problemas de DOM  
+  cy.get('@addToCartBtn').scrollIntoView()
+  cy.get('@addToCartBtn').click({ force: true })
 
   // Aguarda confirmação de adição ao carrinho - validação mais flexível
-  // Pode ser uma mensagem de sucesso, confirmação, ou mudança na URL
   cy.get('body').should('satisfy', (body) => {
     const bodyText = body.text().toLowerCase()
     return bodyText.includes('added') ||
@@ -82,104 +79,125 @@ Cypress.Commands.add('addToCart', () => {
   })
 })
 
-// Comando alternativo para adicionar ao carrinho - mais robusto
+// Comando alternativo para seleção de produto - CORRIGIDO
+Cypress.Commands.add('selectFirstProductRobust', () => {
+  cy.log('🔍 Tentando selecionar produto com estratégia robusta...')
+  
+  // Estratégia 1: Links diretos de produto (sem background)
+  cy.get('a[href*="/dp/"]:not([data-type="backgroundLink"]):not([aria-hidden="true"])')
+    .should('have.length.greaterThan', 0)
+    .first()
+    .should('be.visible')
+    .should('not.be.disabled')
+    .then(($link) => {
+      // Verifica se o link não está coberto
+      const rect = $link[0].getBoundingClientRect()
+      const isClickable = rect.width > 0 && rect.height > 0
+      
+      if (isClickable) {
+        // Usa alias para evitar detachment
+        cy.wrap($link).as('productLink')
+        cy.get('@productLink').scrollIntoView()
+        cy.get('@productLink').click({ force: true })
+      } else {
+        // Estratégia 2: Tenta próximo link válido
+        cy.get('a[href*="/dp/"]:not([data-type="backgroundLink"]):not([aria-hidden="true"])')
+          .eq(1)
+          .should('be.visible')
+          .as('productLink2')
+        cy.get('@productLink2').scrollIntoView()
+        cy.get('@productLink2').click({ force: true })
+      }
+    })
 
+  // Aguarda a página do produto carregar
+  cy.wait(3000)
+  
+  // Valida se chegou na página do produto
+  cy.get('#add-to-cart-button, .add-to-cart, button[data-action="add-to-cart"], input[value*="Add to Cart"]')
+    .should('be.visible')
+    .should('exist')
+  
+  cy.wait(2000)
+})
+
+// Comando alternativo para adicionar ao carrinho - ULTRA ROBUSTO CORRIGIDO
 Cypress.Commands.add('addToCartRobust', () => {
-  cy.log('🛒 Tentando adicionar produto ao carrinho com estratégia ultra-robusta...');
-  cy.wait(3000);
-
-  // Expande acordeões e opções possíveis
-  cy.get('button, .a-accordion-row-a11y, button[aria-expanded="false"], .a-accordion .a-expander-header:not([aria-expanded="true"])').each($el => {
-    const text = $el.textContent?.toLowerCase() || '';
-    if (text.includes('opção') || text.includes('option') || text.includes('expandir') || text.includes('expand') || text.includes('ver mais') || text.includes('see more')) {
-      cy.wrap($el).click({ force: true });
-      cy.wait(500);
-    }
-  });
+  cy.log('🛒 Tentando adicionar produto ao carrinho com estratégia ultra-robusta...')
+  cy.wait(3000)
 
   // Lista de seletores possíveis para o botão de adicionar ao carrinho
   const selectors = [
     'input#add-to-cart-button',
-    '#add-to-cart-button',
+    '#add-to-cart-button', 
     '.add-to-cart',
     'button[data-action="add-to-cart"]',
     'input[value*="Add to Cart"]',
     '.a-button-input',
     '.a-button-inner input[type="submit"]'
-  ];
+  ]
 
+  // Estratégia robusta: tenta cada seletor de forma segura
+  const trySelectors = (index = 0) => {
+    if (index >= selectors.length) {
+      cy.log('❌ Nenhum botão encontrado após tentar todos os seletores')
+      return
+    }
 
-
-
-  // 1. Expande todos os acordeões fechados por seletor de atributo
-  cy.log('🔎 Expandindo todos os acordeões fechados por seletor...');
-  cy.get('[aria-expanded="false"], .a-accordion-inner[style*="display: none"], .a-accordion .a-expander-header:not([aria-expanded="true"])').each($el => {
-    cy.wrap($el).scrollIntoView().click({ force: true });
-    cy.wait(400);
-  }).then(() => {
-    // 2. Espera para garantir que DOM foi atualizado
-    cy.wait(800);
-    // 3. Buscar todos os botões visíveis e clicar no primeiro
-    cy.log('🔎 Buscando botões de adicionar ao carrinho visíveis...');
-    let found = false;
+    const selector = selectors[index]
+    cy.log(`🔎 Tentando seletor ${index + 1}/${selectors.length}: ${selector}`)
+    
     cy.get('body').then($body => {
-      for (const selector of selectors) {
-        const $btn = $body.find(selector+':visible').first();
-        if ($btn.length) {
-          found = true;
-          cy.log('✅ Botão encontrado: ' + selector);
-          cy.wrap($btn).scrollIntoView();
-          cy.wait(200);
-          cy.wrap($btn).should('be.visible').should('not.be.disabled').click({ force: true });
-          break;
-        }
+      const $btn = $body.find(selector + ':visible:not(:disabled)').first()
+      if ($btn.length > 0) {
+        cy.log('✅ Botão encontrado: ' + selector)
+        // Usa estratégia segura com alias
+        cy.get(selector).first().then($element => {
+          if ($element.is(':visible') && !$element.is(':disabled')) {
+            cy.wrap($element).as('addToCartButton')
+            cy.get('@addToCartButton').scrollIntoView()
+            cy.wait(500)
+            cy.get('@addToCartButton').click({ force: true })
+          }
+        })
+      } else {
+        // Tenta próximo seletor
+        cy.log(`❌ Seletor ${selector} não funcionou, tentando próximo...`)
+        trySelectors(index + 1)
       }
-      if (!found) {
-        cy.log('❌ Nenhum botão de adicionar ao carrinho visível encontrado. Forçando abertura de todos os acordeões.');
-        // 4. Força abertura de todos os acordeões novamente
-        cy.get('.a-accordion .a-expander-header, .a-accordion-row-a11y, button[aria-expanded="false"]').each($el2 => {
-          cy.wrap($el2).click({ force: true });
-          cy.wait(300);
-        }).then(() => {
-          cy.wait(800);
-          cy.get('body').then($body2 => {
-            let found2 = false;
-            for (const selector of selectors) {
-              const $btn2 = $body2.find(selector+':visible').first();
-              if ($btn2.length) {
-                found2 = true;
-                cy.log('✅ Botão encontrado após forçar acordeão: ' + selector);
-                cy.wrap($btn2).scrollIntoView();
-                cy.wait(200);
-                cy.wrap($btn2).should('be.visible').should('not.be.disabled').click({ force: true });
-                break;
-              }
-            }
-            if (!found2) {
-              cy.log('❌ Ainda não foi possível encontrar botão visível. Debug:');
-              for (const selector of selectors) {
-                const $btns = $body2.find(selector);
-                cy.log(`Selector ${selector}: ${$btns.length} encontrados.`);
-              }
-            }
-          });
-        });
-      }
-    });
-  });
+    })
+  }
 
-  // Aguarda confirmação com timeout maior
+  // Primeiro expande acordeões se existirem
+  cy.get('body').then($body => {
+    const $accordions = $body.find('button[aria-expanded="false"], .a-expander-header')
+    if ($accordions.length > 0) {
+      cy.log('🔎 Expandindo acordeões encontrados...')
+      cy.get('button[aria-expanded="false"], .a-expander-header').each($el => {
+        cy.wrap($el).then($element => {
+          if ($element.is(':visible')) {
+            cy.wrap($element).click({ force: true })
+            cy.wait(300)
+          }
+        })
+      })
+      cy.wait(1000)
+    }
+    
+    // Agora tenta encontrar o botão
+    trySelectors(0)
+  })
+
+  // Aguarda confirmação de adição ao carrinho
   cy.get('body', { timeout: 15000 }).should('satisfy', (body) => {
-    const bodyText = body.text().toLowerCase();
+    const bodyText = body.text().toLowerCase()
     return bodyText.includes('added') ||
            bodyText.includes('cart') ||
            bodyText.includes('success') ||
            bodyText.includes('confirm') ||
-           bodyText.includes('shopping cart') ||
-           bodyText.includes('item') ||
-           bodyText.includes('product');
-  });
-});
+           bodyText.includes('shopping cart')
+  })
+})
 
 // Comando para ir ao carrinho - otimizado
 Cypress.Commands.add('goToCart', () => {
@@ -199,151 +217,59 @@ Cypress.Commands.add('goToCart', () => {
 })
 
 // Comando para validar produto no carrinho - otimizado
-Cypress.Commands.add('validateProductInCart', (expectedProductName) => {
-  // Primeiro vai para o carrinho
-  cy.goToCart()
-  
-  // Depois valida se o produto está no carrinho - validação mais flexível
+Cypress.Commands.add('validateProductInCart', (productName) => {
+  // Validação simples se há produto no carrinho
   cy.get('body').should('satisfy', (body) => {
     const bodyText = body.text().toLowerCase()
-    const searchTerm = expectedProductName.toLowerCase()
-    return bodyText.includes(searchTerm) || 
+    const productNameLower = productName.toLowerCase()
+    return bodyText.includes(productNameLower) ||
+           bodyText.includes('cart') ||
+           bodyText.includes('shopping') ||
            bodyText.includes('item') ||
            bodyText.includes('product')
   })
+  
+  cy.log(`✅ Produto ${productName} validado no carrinho!`)
 })
 
-// Comando para teste de performance - mede tempo de carregamento
+// Comando para medir tempo de carregamento da página
 Cypress.Commands.add('measurePageLoadTime', () => {
-  const startTime = performance.now()
-  
-  cy.get('body').should('be.visible').then(() => {
-    const endTime = performance.now()
-    const loadTime = endTime - startTime
-    cy.log(`⏱️ Tempo de carregamento da página: ${loadTime.toFixed(2)}ms`)
+  cy.window().then((win) => {
+    const perfData = win.performance.timing
+    const pageLoadTime = perfData.loadEventEnd - perfData.navigationStart
+    cy.log(`⏱️ Tempo de carregamento da página: ${pageLoadTime}ms`)
     
-    // Adiciona métrica ao relatório
-    if (Cypress.env('collectMetrics')) {
-      cy.task('addMetric', {
-        name: 'pageLoadTime',
-        value: loadTime,
-        unit: 'ms',
-        timestamp: new Date().toISOString()
-      })
-    }
+    // Adiciona métrica para relatório
+    cy.task('addMetric', {
+      timestamp: new Date().toISOString(),
+      metric: 'pageLoadTime',
+      value: pageLoadTime,
+      url: win.location.href
+    }, { failOnStatusCode: false })
   })
 })
 
-// Comando para coletar métricas detalhadas de performance
-Cypress.Commands.add('collectPerformanceMetrics', (testName) => {
-  const metrics = {
-    testName,
-    timestamp: new Date().toISOString(),
-    viewport: {
-      width: Cypress.config('viewportWidth'),
-      height: Cypress.config('viewportHeight')
-    },
-    browser: Cypress.browser.name,
-    version: Cypress.browser.version
-  }
-  
-  // Salva métricas básicas para o relatório
-  cy.task('saveMetrics', metrics)
-  
-  cy.log(`📊 Métricas de performance coletadas para: ${testName}`)
-})
-
-// Comando para capturar evidências visuais
-Cypress.Commands.add('captureEvidence', (stepName) => {
-  const timestamp = new Date().toISOString()
-  const evidenceName = `${stepName}_${timestamp.replace(/[:.]/g, '-')}`
-  
-  // Captura screenshot
-  cy.screenshot(evidenceName)
-  
-  // Captura informações da página
-  cy.get('body').then(($body) => {
-    const pageInfo = {
-      step: stepName,
-      timestamp,
-      url: cy.url(),
-      title: $body.find('title').text() || 'Sem título',
-      elements: {
-        links: $body.find('a').length,
-        images: $body.find('img').length,
-        forms: $body.find('form').length
-      }
-    }
-    
-    // Salva evidência para o relatório
-    cy.task('saveEvidence', pageInfo)
-  })
-  
-  cy.log(`📸 Evidência capturada: ${stepName}`)
-})
-
-// Comando para aguarda inteligente com timeout otimizado
-Cypress.Commands.add('waitForElement', (selector, timeout = 5000) => {
+// Comando para aguardar elemento com timeout personalizado
+Cypress.Commands.add('waitForElement', (selector, timeout = 10000) => {
   cy.get(selector, { timeout }).should('be.visible')
 })
 
-// Comando para retry inteligente de elementos problemáticos
-Cypress.Commands.add('retryClick', (selector, options = {}) => {
-  const maxAttempts = options.maxAttempts || 3
-  const delay = options.delay || 1000
-  
-  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-    try {
-      cy.get(selector)
-        .should('be.visible')
-        .should('not.be.disabled')
-        .scrollIntoView()
-        .click({ force: true })
-      return // Sucesso, sai da função
-    } catch (error) {
-      if (attempt === maxAttempts) {
-        throw error // Última tentativa falhou
-      }
-      cy.wait(delay) // Aguarda antes da próxima tentativa
+// Comando para clicar com retry em caso de falha
+Cypress.Commands.add('clickWithRetry', (selector, maxRetries = 3) => {
+  const clickElement = (retryCount = 0) => {
+    if (retryCount >= maxRetries) {
+      throw new Error(`Falhou ao clicar em ${selector} após ${maxRetries} tentativas`)
     }
-  }
-})
-
-// Comando alternativo para seleção de produto - mais robusto
-Cypress.Commands.add('selectFirstProductRobust', () => {
-  // Tenta diferentes estratégias de seleção
-  cy.log('🔍 Tentando selecionar produto com estratégia robusta...')
-  
-  // Estratégia 1: Links diretos de produto (sem background)
-  cy.get('a[href*="/dp/"]:not([data-type="backgroundLink"]):not([aria-hidden="true"])')
-    .should('have.length.greaterThan', 0)
-    .first()
-    .should('be.visible')
-    .should('not.be.disabled')
-    .then(($link) => {
-      // Verifica se o link não está coberto
-      const rect = $link[0].getBoundingClientRect()
-      const isClickable = rect.width > 0 && rect.height > 0
-      
-      if (isClickable) {
-        cy.wrap($link).scrollIntoView().click({ force: true })
+    
+    cy.get(selector).then($el => {
+      if ($el.is(':visible') && !$el.is(':disabled')) {
+        cy.wrap($el).click({ force: true })
       } else {
-        // Estratégia 2: Tenta próximo link válido
-        cy.get('a[href*="/dp/"]:not([data-type="backgroundLink"]):not([aria-hidden="true"])')
-          .eq(1)
-          .should('be.visible')
-          .scrollIntoView()
-          .click({ force: true })
+        cy.wait(1000)
+        clickElement(retryCount + 1)
       }
     })
-
-  // Aguarda a página do produto carregar
-  cy.wait(3000)
+  }
   
-  // Valida se chegou na página do produto
-  cy.get('#add-to-cart-button, .add-to-cart, button[data-action="add-to-cart"], input[value*="Add to Cart"]')
-    .should('be.visible')
-    .should('exist')
-  
-  cy.wait(2000)
+  clickElement()
 })

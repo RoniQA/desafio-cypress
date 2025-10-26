@@ -4,6 +4,21 @@
 
 Este documento descreve os cenários de teste automatizados implementados para validar o fluxo de ponta a ponta de um cliente em um portal de e-commerce (Amazon.com).
 
+## 🚨 **CORREÇÕES APLICADAS (26/10/2025)**
+
+### **Problema Resolvido: Element Detachment Error**
+- **Erro**: `CypressError: cy.scrollIntoView() failed because the page updated as a result of this command, but you tried to continue the command chain. The subject is no longer attached to the DOM`
+- **Causa**: Uso de chains com `scrollIntoView()` que causavam re-renderização do DOM
+- **Solução**: 
+  - ✅ Quebra de chains usando aliases (`cy.as()`)
+  - ✅ Separação de comandos `scrollIntoView()` e `click()`
+  - ✅ Implementação de estratégias mais robustas nos comandos customizados
+
+### **Comandos Corrigidos**:
+1. ✅ `selectFirstProductRobust()` - Removido chain perigoso
+2. ✅ `addToCartRobust()` - Implementação completamente reescrita
+3. ✅ Todos os comandos agora usam aliases para evitar detachment
+
 ## 🎯 Objetivos dos Testes
 
 ### Cenário Principal (Fluxo de Sucesso)
