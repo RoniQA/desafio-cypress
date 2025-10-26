@@ -21,6 +21,14 @@ jobs:
           
       - name: Install Dependencies
         run: npm ci
+        env:
+          CYPRESS_INSTALL_BINARY: 0
+      
+      - name: Verify Cypress Installation
+        run: |
+          npx cypress install --force
+          npx cypress verify
+        continue-on-error: false
         
       - name: Lint Check
         run: |
