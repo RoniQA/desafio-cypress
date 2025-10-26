@@ -165,10 +165,8 @@ function main() {
         }
       }
       
-      const reportData = defaultReport
-      
       // Gera relatório HTML
-      const htmlReport = generateDetailedHTMLReport(reportData)
+      const htmlReport = generateDetailedHTMLReport(defaultReport)
       
       // Salva relatório HTML
       const htmlPath = path.join(__dirname, '..', 'cypress', 'reports', 'detailed-report.html')
