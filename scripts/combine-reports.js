@@ -81,7 +81,6 @@ function combineAllReports() {
       artifacts: {
         screenshots: 'cypress/screenshots/',
         videos: 'cypress/videos/',
-  // mochawesome: 'mochawesome-report/',
         detailed: 'cypress/reports/'
       }
     }

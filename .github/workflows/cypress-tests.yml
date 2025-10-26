@@ -23,6 +23,8 @@ jobs:
           
       - name: Install Dependencies
         run: npm ci
+        env:
+          CYPRESS_INSTALL_BINARY: 0
         
       - name: Cypress Cache
         uses: actions/cache@v4
@@ -31,6 +33,12 @@ jobs:
           key: cypress-cache-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
             cypress-cache-${{ runner.os }}-
+      
+      - name: Verify Cypress Installation
+        run: |
+          npx cypress install --force
+          npx cypress verify
+        continue-on-error: false
             
       - name: Run Cypress Tests (E2E + Performance)
         uses: cypress-io/github-action@v6
@@ -58,6 +66,7 @@ jobs:
 
       - name: Generate Detailed Reports
         if: always()
+        continue-on-error: true
         run: |
           echo "🚀 Gerando relatórios detalhados..."
           
@@ -69,20 +78,14 @@ jobs:
           echo "Branch: ${{ github.ref }}" >> performance-report-${{ github.run_id }}.txt
           echo "Commit: ${{ github.sha }}" >> performance-report-${{ github.run_id }}.txt
           echo "Workflow: ${{ github.workflow }}" >> performance-report-${{ github.run_id }}.txt
-          echo "Status: ${{ job.status }}" >> performance-report-${{ github.run_id }}.txt
-          echo "Duration: ${{ job.steps.*.duration }}" >> performance-report-${{ github.run_id }}.txt
           
           # Gera relatório combinado com todos os testes
           echo "🔄 Gerando relatório combinado..."
-          node scripts/combine-reports.js
+          node scripts/combine-reports.js || echo "⚠️ Relatório combinado não gerado"
           
-          # Gera relatório HTML se os testes passaram
-          if [ "${{ job.status }}" == "success" ]; then
-            echo "✅ Testes passaram - gerando relatório HTML..."
-            node scripts/generate-report.js
-          else
-            echo "❌ Testes falharam - relatório HTML não será gerado"
-          fi
+          # Gera relatório HTML detalhado
+          echo "📝 Gerando relatório HTML..."
+          node scripts/generate-report.js || echo "⚠️ Relatório HTML não gerado"
           
       - name: Upload Performance Report
         uses: actions/upload-artifact@v4

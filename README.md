@@ -6,6 +6,14 @@
 
 Este projeto contém testes automatizados usando Cypress para validar o fluxo de ponta a ponta de um cliente em um portal de comércio online (Amazon.com), com **otimizações avançadas de performance**.
 
+## 📚 Documentação de Troubleshooting
+
+Se você está enfrentando problemas com a execução dos testes ou workflows, consulte:
+
+- **[ERROR_ANALYSIS.md](ERROR_ANALYSIS.md)** - Análise técnica completa de erros comuns e suas soluções
+- **[COPILOT_FIX_INSTRUCTIONS.md](COPILOT_FIX_INSTRUCTIONS.md)** - Guia rápido para pedir ao GitHub Copilot corrigir problemas
+- **[CORRECTIONS_SUMMARY.md](CORRECTIONS_SUMMARY.md)** - Resumo das correções já aplicadas no projeto
+
 ## 🎯 Objetivo
 
 Automatizar cenários de teste que cubram o fluxo completo de compra com **máxima performance**:
