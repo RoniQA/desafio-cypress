@@ -44,10 +44,12 @@ jobs:
           record: false
           spec: 'cypress/e2e/amazon-e2e.cy.js'
           config-file: cypress.config.ci.js
+        env:
+          ALLURE_RESULTS_DIR: allure-results-functional
 
       - name: Generate Allure Report (Functional)
         run: |
-          npx allure generate allure-results -o allure-report-functional --clean
+          npx allure generate --output allure-report-functional allure-results-functional
         shell: bash
 
       - name: Upload Allure Report (Functional)
@@ -64,10 +66,12 @@ jobs:
           record: false
           spec: 'cypress/e2e/performance-test.cy.js'
           config-file: cypress.config.ci.js
+        env:
+          ALLURE_RESULTS_DIR: allure-results-performance
 
       - name: Generate Allure Report (Performance)
         run: |
-          npx allure generate allure-results -o allure-report-performance --clean
+          npx allure generate --output allure-report-performance allure-results-performance
         shell: bash
 
       - name: Upload Allure Report (Performance)

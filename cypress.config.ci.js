@@ -44,7 +44,12 @@ module.exports = defineConfig({
     viewportHeight: 768,
     
     setupNodeEvents(on, config) {
-      // implement node event listeners here
+      // Configurar Allure
+      require('@shelex/cypress-allure-plugin')(on, config, {
+        resultsDir: process.env.ALLURE_RESULTS_DIR || 'allure-results'
+      });
+      
+      return config;
     },
   },
   
