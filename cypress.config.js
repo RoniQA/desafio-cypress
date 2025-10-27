@@ -2,14 +2,6 @@ const { defineConfig } = require('cypress')
 
 module.exports = defineConfig({
   e2e: {
-    reporter: '@shelex/cypress-allure-plugin',
-    reporterOptions: {
-      allure: {
-        outputDir: 'allure-results',
-        disableWebdriverStepsReporting: true,
-        disableWebdriverScreenshotsReporting: false
-      }
-    },
     baseUrl: 'https://www.amazon.com',
     viewportWidth: 1280,
     viewportHeight: 720,
@@ -31,7 +23,11 @@ module.exports = defineConfig({
     },
     
     setupNodeEvents(on, config) {
-      require('@shelex/cypress-allure-plugin/writer')(on, config);
+      require('@shelex/cypress-allure-plugin/writer')(on, config, {
+        outputDir: 'allure-results',
+        disableWebdriverStepsReporting: true,
+        disableWebdriverScreenshotsReporting: false
+      });
       // Tasks para coleta de métricas e evidências
       const metrics = []
       const evidence = []

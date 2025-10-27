@@ -2,14 +2,6 @@ const { defineConfig } = require('cypress')
 
 module.exports = defineConfig({
   e2e: {
-    reporter: '@shelex/cypress-allure-plugin',
-    reporterOptions: {
-      allure: {
-        outputDir: process.env.ALLURE_RESULTS_DIR || 'allure-results',
-        disableWebdriverStepsReporting: true,
-        disableWebdriverScreenshotsReporting: false
-      }
-    },
     baseUrl: 'https://www.amazon.com',
     viewportWidth: 1280,
     viewportHeight: 720,
@@ -52,7 +44,11 @@ module.exports = defineConfig({
     viewportHeight: 768,
     
     setupNodeEvents(on, config) {
-      require('@shelex/cypress-allure-plugin/writer')(on, config);
+      require('@shelex/cypress-allure-plugin/writer')(on, config, {
+        outputDir: process.env.ALLURE_RESULTS_DIR || 'allure-results',
+        disableWebdriverStepsReporting: true,
+        disableWebdriverScreenshotsReporting: false
+      });
       return config;
     },
   },
