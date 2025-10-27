@@ -49,6 +49,86 @@ module.exports = defineConfig({
         disableWebdriverStepsReporting: true,
         disableWebdriverScreenshotsReporting: false
       });
+      
+      // Tasks para coleta de métricas e evidências
+      const metrics = []
+      const evidence = []
+      
+      on('task', {
+        addMetric(metric) {
+          metrics.push(metric)
+          return null
+        },
+        
+        saveMetrics(metricData) {
+          metrics.push(metricData)
+          return null
+        },
+        
+        saveEvidence(evidenceData) {
+          evidence.push(evidenceData)
+          return null
+        },
+        
+        generateDetailedReport() {
+          const reportData = {
+            timestamp: new Date().toISOString(),
+            metrics,
+            evidence,
+            summary: {
+              totalMetrics: metrics.length,
+              totalEvidence: evidence.length,
+              testDuration: Date.now() - new Date(metrics[0]?.timestamp || Date.now()).getTime()
+            }
+          }
+          
+          // Salva relatório detalhado
+          const reportPath = require('path').join('cypress', 'reports', 'detailed-report.json')
+          require('fs').writeFileSync(reportPath, JSON.stringify(reportData, null, 2))
+          
+          return reportPath
+        }
+      })
+      
+      // Hook para gerar relatório detalhado após os testes
+      on('after:run', async (results) => {
+        try {
+          // Cria diretório se não existir
+          const fs = require('fs')
+          const path = require('path')
+          const reportsDir = path.join('cypress', 'reports')
+          
+          if (!fs.existsSync(reportsDir)) {
+            fs.mkdirSync(reportsDir, { recursive: true })
+          }
+          
+          // Gera relatório detalhado
+          const reportData = {
+            timestamp: new Date().toISOString(),
+            metrics,
+            evidence,
+            summary: {
+              totalMetrics: metrics.length,
+              totalEvidence: evidence.length,
+              testDuration: Date.now() - new Date(metrics[0]?.timestamp || Date.now()).getTime()
+            },
+            performance: {
+              totalDuration: results.totalDuration,
+              browser: results.browserName,
+              version: results.browserVersion
+            }
+          }
+          
+          // Salva relatório final
+          const finalReportPath = path.join(reportsDir, 'final-report.json')
+          fs.writeFileSync(finalReportPath, JSON.stringify(reportData, null, 2))
+          
+          console.log('✅ Relatório detalhado gerado com sucesso!')
+        } catch (error) {
+          console.error('❌ Erro ao gerar relatório:', error.message)
+        }
+      })
+      
       return config;
     },
   },
