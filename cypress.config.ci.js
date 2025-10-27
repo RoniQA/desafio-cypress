@@ -2,7 +2,7 @@ const { defineConfig } = require('cypress')
 
 module.exports = defineConfig({
   e2e: {
-    reporter: 'cypress-allure-plugin',
+    reporter: '@shelex/cypress-allure-plugin',
     reporterOptions: {
       allure: {
         outputDir: process.env.ALLURE_RESULTS_DIR || 'allure-results',
